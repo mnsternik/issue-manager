@@ -25,15 +25,17 @@ namespace IssueManager.Models
 
         public DateTime? UpdatedDate { get; set; }
 
-        public ICollection<Attachment> Attachments { get; set; }
+        public ICollection<Attachment>? Attachments { get; set; }
 
         [Required]
         public int CategoryId { get; set; } 
         public Category Category { get; set; }
 
-        public string AssignedToUserId { get; set; } 
-        public User AssignedToUser { get; set; }
+        public string? AssignedToUserId { get; set; } 
+        public User? AssignedToUser { get; set; }
 
+        public int? AssignedToTeamId { get; set; }
+        public Team? AssignedToTeam { get; set; }
     }
 
     public enum RequestStatus
