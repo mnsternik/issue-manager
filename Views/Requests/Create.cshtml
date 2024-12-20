@@ -1,0 +1,62 @@
+﻿@model IssueManager.Models.ViewModels.CreateRequestViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>Request</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Title" class="control-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <textarea asp-for="Description" class="form-control"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Priority" class="control-label"></label>
+                <select asp-for="Priority" class="form-select" asp-items="@Html.GetEnumSelectList(typeof(RequestPriority))"></select>
+                <span asp-validation-for="Priority" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="SelectedCategoryId" class="control-label"></label>
+                <select asp-for="SelectedCategoryId" class="form-select" asp-items="ViewBag.CategorySelectOptions">
+                    <option value="">Select Category</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label asp-for="SelectedUserId" class="control-label"></label>
+                <select asp-for="SelectedUserId" class="form-select" asp-items="ViewBag.UserSelectOptions">
+                    <option value="">Select User</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label asp-for="SelectedTeamId" class="control-label"></label>
+                <select asp-for="SelectedTeamId" class="form-select" asp-items="ViewBag.TeamSelectOptions">
+                    <option value="">Select Team</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
