@@ -51,51 +51,51 @@ namespace IssueManager.Controllers
         // GET: Requests/Create
         public IActionResult Create()
         {
-            var categories = _context.Categories.Select(c => new SelectListItem
+            ViewData["CategorySelectOptions"] = _context.Categories.Select(c => new SelectListItem
             {
                 Value = c.Id.ToString(),
                 Text = c.Name
             });
 
-            var users = _context.Users.Select(u => new SelectListItem
+            ViewData["UserSelectOptions"] = _context.Users.Select(u => new SelectListItem
             {
                 Value = u.Id,
                 Text = u.FullName
             });
 
-            var teams = _context.Teams.Select(t => new SelectListItem
+            ViewData["TeamSelectOptions"] = _context.Teams.Select(t => new SelectListItem
             {
                 Value = t.Id.ToString(),
                 Text = t.Name
              });
 
-            var createRequestViewModel = new CreateRequestViewModel
-            {
-                Categories = categories,
-                Users = users,
-                Teams = teams
-            };
-
-            return View(createRequestViewModel);
+            return View(new CreateRequestViewModel());
         }
 
         // POST: Requests/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Description,Status,Priority,CreatedDate,UpdatedDate,CategoryId,AssignedToUserId,AssignedToTeamId")] Request request)
+        public async Task<IActionResult> Create(CreateRequestViewModel viewModel)
         {
             if (ModelState.IsValid)
             {
+                var request = new Request
+                {
+                    Title = viewModel.Title,
+                    Description = viewModel.Description,
+                    Status = RequestStatus.New,
+                    Priority = viewModel.Priority,
+                    CategoryId = viewModel.SelectedCategoryId,
+                    AssignedToTeamId = viewModel.SelectedTeamId,
+                    AssignedToUserId = viewModel.SelectedUserId,
+                };
+
                 _context.Add(request);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AssignedToTeamId"] = new SelectList(_context.Teams, "Id", "Name", request.AssignedToTeamId);
-            ViewData["AssignedToUserId"] = new SelectList(_context.Users, "Id", "Id", request.AssignedToUserId);
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", request.CategoryId);
-            return View(request);
+
+            return View(viewModel);
         }
 
         // GET: Requests/Edit/5
