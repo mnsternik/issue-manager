@@ -1,5 +1,13 @@
-html {
-  font-size: 14px;
+@import url('./base/containers.css');
+@import url('./components/buttons.css');
+@import url('./components/forms.css');
+@import url('./components/tables.css');
+@import url('./layout/footer.css');
+@import url('./layout/navbar.css');
+
+:root {
+    --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+    --navbar-height: 70px;
 }
 
 @media (min-width: 768px) {
@@ -13,10 +21,20 @@ html {
 }
 
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
+    font-size: 14px;
 }
 
 body {
-  margin-bottom: 60px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #f3f4f6;
+}
+
+main {
+    flex: 1;
+    padding: 2rem 0;
+    margin-bottom: 102px; 
 }
