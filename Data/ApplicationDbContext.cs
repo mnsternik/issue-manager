@@ -21,7 +21,7 @@ namespace IssueManager.Data
                 .HasOne(r => r.AssignedToUser)
                 .WithMany()
                 .HasForeignKey(r => r.AssignedToUserId)
-                .OnDelete(DeleteBehavior.Restrict); 
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Relacja do zespołu (AssignedToTeam)
             modelBuilder.Entity<Request>()
@@ -30,20 +30,28 @@ namespace IssueManager.Data
                 .HasForeignKey(r => r.AssignedToTeamId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Relacja do odpowiedzi do złoszenia (Responses)
+            modelBuilder.Entity<Request>()
+                .HasMany(r => r.Responses) 
+                .WithOne(rr => rr.Request) 
+                .HasForeignKey(rr => rr.RequestId) 
+                .OnDelete(DeleteBehavior.Cascade); 
+
             modelBuilder.Entity<Team>().HasData(new Team
             {
-                Id = 1,
-                Name = "Default Team"
+                Id = 2,
+                Name = "Helpdesk"
             });
 
             modelBuilder.Entity<Category>().HasData(new Category
             {
-                Id = 1,
-                Name = "Default Category"
+                Id = 2,
+                Name = "Applications"
             });
         }
 
         public DbSet<Request> Requests { get; set; }
+        public DbSet<RequestResponse> RequestResponses { get; set; }
         public DbSet<Team> Teams { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Attachment> Attachments { get; set; }
