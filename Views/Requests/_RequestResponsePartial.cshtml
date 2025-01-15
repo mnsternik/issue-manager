@@ -1,0 +1,59 @@
+﻿@model IEnumerable<IssueManager.Models.ViewModels.RequestResponseViewModel>
+
+<style>
+    .response-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border: 1px solid #e5e7eb;
+    }
+
+    .response-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+
+    .response-author {
+        font-weight: 600;
+        color: #4f46e5;
+        font-size: 0.95rem;
+    }
+
+    .response-time {
+        color: #9ca3af;
+        font-size: 0.85rem;
+    }
+
+    .response-content {
+        color: #374151;
+        line-height: 1.5;
+        font-size: 0.95rem;
+    }
+</style>
+
+<div class="responses">
+    @if (Model.Any())
+    {
+        @foreach (var response in Model)
+        {
+            <div class="response-card">
+                <div class="response-header">
+                    <div class="response-author">@response.AuthorName</div>
+                    <div class="response-time">@response.CreateDate.ToString("g")</div>
+                </div>
+                <div class="response-content">
+                    @response.ResponseText
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <p>No resposnes yet</p>
+    }
+</div>  
