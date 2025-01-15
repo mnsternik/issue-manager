@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace IssueManager.Models.ViewModels
 {
@@ -22,12 +21,12 @@ namespace IssueManager.Models.ViewModels
 
         [Required]
         [Display(Name = "Category")]
-        public int SelectedCategoryId { get; set; }
+        public int CategoryId { get; set; }
 
         [Display(Name = "Target user")]
-        public string? SelectedUserId { get; set; }
+        public string? AssignedUserId { get; set; }
 
         [Display(Name = "Target team")]
-        public int? SelectedTeamId { get; set; }
+        public int? AssignedTeamId { get; set; }
     }
 }
