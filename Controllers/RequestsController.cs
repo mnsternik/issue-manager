@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using IssueManager.Data;
@@ -10,8 +6,8 @@ using IssueManager.Models;
 using IssueManager.Models.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
 using IssueManager.Helpers;
+using AutoMapper;
 
 namespace IssueManager.Controllers
 {
@@ -19,11 +15,13 @@ namespace IssueManager.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<User> _userManager;
+        private readonly IMapper _mapper;
 
-        public RequestsController(ApplicationDbContext context, UserManager<User> userManager)
+        public RequestsController(ApplicationDbContext context, UserManager<User> userManager, IMapper mapper)
         {
             _context = context;
             _userManager = userManager;
+            _mapper = mapper;
         }
 
         // GET: Requests
@@ -31,18 +29,16 @@ namespace IssueManager.Controllers
         {
             const int pageSize = 10;
 
-            IQueryable<Request> query = _context.Requests
-                .Include(r => r.AssignedToTeam)
-                .Include(r => r.AssignedToUser)
-                .Include(r => r.Author)
-                .Include(r => r.Category);
+            IQueryable<Request> query = _context.Requests;
 
             if (!string.IsNullOrEmpty(search))
             {
                 query = query.Where(r => r.Title.ToLower().Contains(search));
             }
 
-            var paginatedRequestsList = await PaginatedList<Request>.CreateAsync(query, pageIndex, pageSize);
+            IQueryable<RequestsListItemViewModel> mappedQuery = _mapper.ProjectTo<RequestsListItemViewModel>(query);
+
+            var paginatedRequestsList = await PaginatedList<RequestsListItemViewModel>.CreateAsync(mappedQuery, pageIndex, pageSize);
 
             var requestsListViewModel = new RequestsListViewModel
             {
@@ -61,38 +57,26 @@ namespace IssueManager.Controllers
                 return NotFound();
             }
 
-            var requestViewModel = await _context.Requests
-                .Where(r => r.Id == id)
-                .Select(r => new DetailsRequestViewModel
-                {
-                    Id = r.Id,
-                    Title = r.Title,
-                    Description = r.Description,
-                    Priority = r.Priority,
-                    Status = r.Status,
-                    CreatedDate = r.CreatedDate,
-                    UpdatedDate = r.UpdatedDate,
-                    Attachments = r.Attachments,
-                    CategoryName = r.Category.Name,
-                    AssignedUserName = r.AssignedToUser != null ? r.AssignedToUser.UserName : "Not assigned",
-                    AssignedTeamName = r.AssignedToTeam != null ? r.AssignedToTeam.Name : "Not assigned",
-                    AuthorName = r.Author.UserName,
-                    Responses = r.Responses.Select(rr => new RequestResponseViewModel
-                    {
-                        Id = rr.Id,
-                        RequestId = rr.RequestId,
-                        AuthorName = rr.Author.UserName,
-                        CreateDate = rr.CreateDate,
-                        ResponseText = rr.ResponseText
-                    }).ToList()
-
-                })
-                .AsNoTracking()
-                .FirstOrDefaultAsync();
+            var requestViewModel = await _mapper
+                .ProjectTo<DetailsRequestViewModel>(_context.Requests.AsNoTracking())
+                .FirstOrDefaultAsync(r => r.Id == id);
 
             if (requestViewModel == null)
             {
                 return NotFound();
+            }
+
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user != null)
+            {
+                var teamName = await _context.Users
+                    .Where(u => u.Id == user.Id)
+                    .Select(u => u.Team!.Name)
+                    .FirstOrDefaultAsync();
+
+                requestViewModel.AllowAssign = teamName == requestViewModel.AssignedTeamName; // TODO: Change it to compare ID's, not names. 
+                requestViewModel.AllowEdit = user.Name == requestViewModel.AssignedUserName;
             }
 
             return View(requestViewModel);
@@ -101,23 +85,9 @@ namespace IssueManager.Controllers
         // GET: Requests/Create
         public IActionResult Create()
         {
-            ViewData["CategorySelectOptions"] = _context.Categories.Select(c => new SelectListItem
-            {
-                Value = c.Id.ToString(),
-                Text = c.Name
-            });
-
-            ViewData["UserSelectOptions"] = _context.Users.Select(u => new SelectListItem
-            {
-                Value = u.Id,
-                Text = u.Username
-            });
-
-            ViewData["TeamSelectOptions"] = _context.Teams.Select(t => new SelectListItem
-            {
-                Value = t.Id.ToString(),
-                Text = t.Name
-            });
+            ViewData["TeamSelectOptions"] = new SelectList(_context.Teams, "Id", "Name");
+            ViewData["UserSelectOptions"] = new SelectList(_context.Users, "Id", "Name");
+            ViewData["CategorySelectOptions"] = new SelectList(_context.Categories, "Id", "Name");
 
             return View(new CreateRequestViewModel());
         }
@@ -130,17 +100,9 @@ namespace IssueManager.Controllers
         {
             if (ModelState.IsValid)
             {
-                var request = new Request
-                {
-                    Title = viewModel.Title,
-                    Description = viewModel.Description,
-                    Status = RequestStatus.Open,
-                    Priority = viewModel.Priority,
-                    CategoryId = viewModel.SelectedCategoryId,
-                    AssignedToTeamId = viewModel.SelectedTeamId,
-                    AssignedToUserId = viewModel.SelectedUserId,
-                    AuthorId = _userManager.GetUserId(User)!
-                };
+                var request = _mapper.Map<Request>(viewModel);
+                request.Status = RequestStatus.Open;
+                request.AuthorId = _userManager.GetUserId(User)!; 
 
                 _context.Add(request);
                 await _context.SaveChangesAsync();
@@ -153,58 +115,42 @@ namespace IssueManager.Controllers
         // GET: Requests/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            var requestViewModel = await _context.Requests
-                .Where(r => r.Id == id)
-                .Select(r => new DetailsRequestViewModel
-                {
-                    Id = r.Id,
-                    Title = r.Title,
-                    Description = r.Description,
-                    Priority = r.Priority,
-                    Status = r.Status,
-                    CreatedDate = r.CreatedDate,
-                    UpdatedDate = r.UpdatedDate,
-                    Attachments = r.Attachments,
-                    CategoryName = r.Category.Name,
-                    AssignedUserName = r.AssignedToUser != null ? r.AssignedToUser.UserName : "Not assigned",
-                    AssignedTeamName = r.AssignedToTeam != null ? r.AssignedToTeam.Name : "Not assigned",
-                    AuthorName = r.Author.UserName,
-                    Responses = r.Responses.Select(rr => new RequestResponseViewModel
-                    {
-                        Id = rr.Id,
-                        RequestId = rr.RequestId,
-                        AuthorName = rr.Author.UserName,
-                        CreateDate = rr.CreateDate,
-                        ResponseText = rr.ResponseText
-                    }).ToList()
+            if (id == null)
+            {
+                return NotFound();
+            }
 
-                })
-                .AsNoTracking()
-                .FirstOrDefaultAsync();
+            var requestViewModel = await _mapper
+                .ProjectTo<EditRequestViewModel>(_context.Requests.AsNoTracking())
+                .FirstOrDefaultAsync(r => r.Id == id); 
 
             if (requestViewModel == null)
             {
                 return NotFound();
             }
 
-            ViewData["TeamSelectOptions"] = new SelectList(_context.Teams, "Id", "Name", requestViewModel.AssignedTeamName);
-            ViewData["UserSelectOptions"] = new SelectList(_context.Users, "Id", "Id", requestViewModel.AssignedUserName);
-            ViewData["CategorySelectOptions"] = new SelectList(_context.Categories, "Id", "Name", requestViewModel.CategoryName);
+            ViewData["TeamSelectOptions"] = new SelectList(_context.Teams, "Id", "Name", requestViewModel.AssignedTeamId);
+            ViewData["UserSelectOptions"] = new SelectList(_context.Users, "Id", "Name", requestViewModel.AssignedUserId);
+            ViewData["CategorySelectOptions"] = new SelectList(_context.Categories, "Id", "Name", requestViewModel.CategoryId);
+
             return View(requestViewModel);
         }
 
         // POST: Requests/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,Status,Priority,CreatedDate,UpdatedDate,CategoryId,AssignedToUserId,AssignedToTeamId")] Request request)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,Status,Priority,CreateDate,UpdateDate,AuthorName,AuthorId,CategoryId,AssignedUserId,AssignedTeamId")] EditRequestViewModel requestViewModel)
         {
-            if (id != request.Id)
+            if (id != requestViewModel.Id)
             {
                 return NotFound();
             }
 
             if (ModelState.IsValid)
             {
+                var request = _mapper.Map<Request>(requestViewModel);
+                request.UpdateDate = DateTime.UtcNow; 
+
                 try
                 {
                     _context.Update(request);
@@ -223,17 +169,19 @@ namespace IssueManager.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AssignedToTeamId"] = new SelectList(_context.Teams, "Id", "Name", request.AssignedToTeamId);
-            ViewData["AssignedToUserId"] = new SelectList(_context.Users, "Id", "Id", request.AssignedToUserId);
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", request.CategoryId);
-            return View(request);
+
+            ViewData["AssignedToTeamId"] = new SelectList(_context.Teams, "Id", "Name", requestViewModel.AssignedTeamId);
+            ViewData["AssignedToUserId"] = new SelectList(_context.Users, "Id", "Id", requestViewModel.AssignedUserId);
+            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", requestViewModel.CategoryId);
+
+            return View(requestViewModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddResponse(int requestId, string responseText)
         {
-            if (!User.Identity.IsAuthenticated)
+            if (!User.Identity!.IsAuthenticated)
             {
                 return Unauthorized();
             }
@@ -242,7 +190,7 @@ namespace IssueManager.Controllers
             {
                 RequestId = requestId,
                 ResponseText = responseText,
-                AuthorId = _userManager.GetUserId(User),
+                AuthorId = _userManager.GetUserId(User)!,
                 CreateDate = DateTime.UtcNow
             };
 
@@ -261,8 +209,8 @@ namespace IssueManager.Controllers
             }
 
             var request = await _context.Requests
-                .Include(r => r.AssignedToTeam)
-                .Include(r => r.AssignedToUser)
+                .Include(r => r.AssignedTeam)
+                .Include(r => r.AssignedUser)
                 .Include(r => r.Category)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (request == null)
