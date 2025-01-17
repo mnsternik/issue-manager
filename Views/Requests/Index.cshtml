@@ -1,0 +1,114 @@
+﻿@model IssueManager.Models.ViewModels.Requests.RequestsListViewModel
+@{
+    ViewData["Title"] = "Requests";
+}
+
+<div class="container py-5">
+    <div class="im-container">
+        <div class="im-header">
+            <h2 class="mb-0">Request Management</h2>
+            <p class="mb-0 opacity-75">View and manage all requests</p>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table im-table">
+                <thead>
+                    <tr>
+                        <th>@Html.DisplayNameFor(model => model.Requests[0].Title)</th>
+                        <th>@Html.DisplayNameFor(model => model.Requests[0].Status)</th>
+                        <th>@Html.DisplayNameFor(model => model.Requests[0].Priority)</th>
+                        <th>@Html.DisplayNameFor(model => model.Requests[0].CreateDate)</th>
+                        <th>@Html.DisplayNameFor(model => model.Requests[0].UpdateDate)</th>
+                        <th>@Html.DisplayNameFor(model => model.Requests[0].CategoryName)</th>
+                        <th>@Html.DisplayNameFor(model => model.Requests[0].AssignedUserName)</th>
+                        <th>@Html.DisplayNameFor(model => model.Requests[0].AssignedTeamName)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Requests)
+                    {
+                        <tr onclick="location.href = '@Url.Action("Details", "Requests", new { id = item.Id })'"
+                            style="cursor: pointer">
+                            <td>@Html.DisplayFor(modelItem => item.Title)</td>
+                            <td>
+                                <span class="im-badge @(item.Status.ToString().ToLower())"
+                                      style="background-color: @GetStatusColor(item.Status)">
+                                    @Html.DisplayFor(modelItem => item.Status)
+                                </span>
+                            </td>
+                            <td>
+                                <span class="im-badge"
+                                      style="background-color: @GetPriorityColor(item.Priority)">
+                                    @Html.DisplayFor(modelItem => item.Priority)
+                                </span>
+                            </td>
+                            <td>@item.CreateDate.ToString("MMM dd, yyyy")</td>
+                            <td>@item.UpdateDate?.ToString("MMM dd, yyyy")</td>
+                            <td>@Html.DisplayFor(modelItem => item.CategoryName)</td>
+                            <td>@Html.DisplayFor(modelItem => item.AssignedUserName)</td>
+                            <td>@Html.DisplayFor(modelItem => item.AssignedTeamName)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <nav>
+            <ul class="pagination">
+                @if (Model.Requests.HasPreviousPage)
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-route-pageIndex="@(Model.Requests.PageIndex - 1)" asp-route-search="@Model.SearchString">Previous</a>
+                    </li>
+                }
+                else
+                {
+                    <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                }
+
+                @for (int i = 1; i <= Model.Requests.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.Requests.PageIndex ? "active" : "")">
+                        <a class="page-link" asp-route-pageIndex="@i" asp-route-search="@Model.SearchString">@i</a>
+                    </li>
+                }
+
+                @if (Model.Requests.HasNextPage)
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-route-pageIndex="@(Model.Requests.PageIndex + 1)" asp-route-search="@Model.SearchString">Next</a>
+                    </li>
+                }
+                else
+                {
+                    <li class="page-item disabled"><span class="page-link">Next</span></li>
+                }
+            </ul>
+        </nav>
+    </div>
+</div>
+
+@functions {
+    private string GetStatusColor(RequestStatus status)
+    {
+        return status switch
+        {
+            RequestStatus.Open => "#3b82f6",    // Blue
+            RequestStatus.InProgress => "#f59e0b", // Yellow
+            RequestStatus.Resolved => "#10b981",   // Green
+            RequestStatus.Closed => "#6b7280",     // Gray
+            _ => "#6b7280"
+        };
+    }
+
+    private string GetPriorityColor(RequestPriority priority)
+    {
+        return priority switch
+        {
+            RequestPriority.Low => "#10b981",     // Green
+            RequestPriority.Medium => "#f59e0b",   // Yellow
+            RequestPriority.High => "#ef4444",     // Red
+            RequestPriority.Critical => "#7f1d1d",  // Dark Red
+            _ => "#6b7280"
+        };
+    }
+}
