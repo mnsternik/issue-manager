@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using IssueManager.Models;
-using IssueManager.Models.ViewModels;
+using IssueManager.Models.ViewModels.Requests;
+using IssueManager.Models.ViewModels.UserManagement;
 
 namespace IssueManager.Mapping
 {
@@ -15,6 +16,10 @@ namespace IssueManager.Mapping
             CreateMap<Request, RequestsListItemViewModel>();
             //CreateMap<RequestResponseViewModel, RequestResponse>();
             CreateMap<RequestResponse, RequestResponseViewModel>();
+
+            CreateMap<User, UsersListItemViewModel>();
+            CreateMap<ManageUserViewModel, User>();
+            CreateMap<User, ManageUserViewModel>();
         }
     }
 }
