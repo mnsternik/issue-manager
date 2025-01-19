@@ -7,7 +7,9 @@
         public string? Email { get; set; }
         public int? TeamId { get; set; }
         public string? TeamName { get; set; }
-        public IEnumerable<string> CurrentRoles { get; set; }
-        public IEnumerable<string>? AvailableRoles { get; set; }
+        public IList<string> CurrentRoles { get; set; }
+        public IList<string> AvailableRoles { get; set; }
+        public IList<string>? SelectedRoles { get; set; }
+
     }
 }
