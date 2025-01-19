@@ -1,0 +1,67 @@
+﻿@model IssueManager.Models.ViewModels.UserManagement.UsersListViewModel
+@{
+    ViewData["Title"] = "UserManagement";
+}
+
+<div class="container py-5">
+    <div class="im-container">
+        <div class="im-header">
+            <h2 class="mb-0">User Management</h2>
+            <p class="mb-0 opacity-75">View and manage all user's roles and teams</p>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table im-table">
+                <thead>
+                    <tr>
+                        <th>@Html.DisplayNameFor(model => model.Users[0].Name)</th>
+                        <th>@Html.DisplayNameFor(model => model.Users[0].Email)</th>
+                        <th>@Html.DisplayNameFor(model => model.Users[0].TeamName)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Users)
+                    {
+                        <tr onclick="location.href = '@Url.Action("ManageUser", "UserManagement", new { id = item.Id })'" style="cursor: pointer">
+                            <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Email)</td>
+                            <td>@Html.DisplayFor(modelItem => item.TeamName)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <nav>
+            <ul class="pagination">
+                @if (Model.Users.HasPreviousPage)
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-route-pageIndex="@(Model.Users.PageIndex - 1)" asp-route-search="@Model.SearchString">Previous</a>
+                    </li>
+                }
+                else
+                {
+                    <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                }
+
+                @for (int i = 1; i <= Model.Users.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.Users.PageIndex ? "active" : "")">
+                        <a class="page-link" asp-route-pageIndex="@i" asp-route-search="@Model.SearchString">@i</a>
+                    </li>
+                }
+
+                @if (Model.Users.HasNextPage)
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-route-pageIndex="@(Model.Users.PageIndex + 1)" asp-route-search="@Model.SearchString">Next</a>
+                    </li>
+                }
+                else
+                {
+                    <li class="page-item disabled"><span class="page-link">Next</span></li>
+                }
+            </ul>
+        </nav>
+    </div>
+</div>

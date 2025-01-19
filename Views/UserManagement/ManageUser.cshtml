@@ -1,0 +1,79 @@
+﻿@model IssueManager.Models.ViewModels.UserManagement.ManageUserViewModel
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="im-container">
+
+                <form method="post" asp-action="ManageUser" asp-controller="UserManagement">
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="back-link">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z" />
+                            </svg>
+                            Back to List
+                        </a>
+                        <button type="submit" class="create-btn" style="margin-bottom: 8px">Save</button>
+                    </div>
+
+                    <div class="im-header">
+                        <h2 class="mb-0 fs-3">Manage user @Model.Name</h2>
+                        <p class="mb-0 opacity-75">Change user's role or team assignemnt</p>
+                    </div>
+
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="AvailableRoles" />
+                    <input type="hidden" asp-for="CurrentRoles" />
+
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <div class="form-floating">
+                                <input asp-for="Name" class="form-control im-form-control" />
+                                <label asp-for="Name"></label>
+                                <span asp-validation-for="Name" class="validation-message"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-floating">
+                                <input asp-for="Email" class="form-control im-form-control" />
+                                <label asp-for="Email"></label>
+                                <span asp-validation-for="Email" class="validation-message"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-floating">
+                                <select asp-for="TeamId" class="form-select im-form-control"
+                                        asp-items="@ViewBag.AssignedTeam">
+                                </select>
+                                <label asp-for="TeamId"></label>
+                                <span asp-validation-for="TeamId" class="validation-message"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <p class="details-label">Assigned roles</p>
+                            <ul class="list-group im-list-group">
+                                @for (int i = 0; i < Model.AvailableRoles.Count; i++)
+                                {
+                                    <li class="list-group-item">
+                                        <input class="form-check-input me-1"
+                                               type="checkbox"
+                                               id="roleCheckbox_@i"
+                                               name="SelectedRoles"
+                                               value="@Model.AvailableRoles[i]"
+                                               checked="@Model.CurrentRoles.Contains(Model.AvailableRoles[i])" />
+                                        <label class="form-check-label" for="roleCheckbox_@i">@Model.AvailableRoles[i]</label>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
