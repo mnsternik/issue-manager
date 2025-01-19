@@ -81,6 +81,7 @@ namespace IssueManager.Controllers
                 TeamName = assignedTeam?.Name,
                 CurrentRoles = currentRoles,
                 AvailableRoles = availableRoles!,
+                SelectedRoles = new List<string>()
             };
 
             ViewData["AssignedTeam"] = new SelectList(_context.Teams, "Id", "Name", userViewModel.TeamId);
@@ -93,12 +94,37 @@ namespace IssueManager.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = await _userManager.FindByIdAsync(model.Id);
+                var user = await _context.Users
+                    .Include(u => u.Team)
+                    .FirstOrDefaultAsync(u => u.Id == model.Id);
 
-                await _userManager.AddToRolesAsync(user!, model.SelectedRoles);
+                if (user == null)
+                {
+                    return NotFound("User not found");
+                }
+
+                var team = await _context.Teams.FindAsync(model.TeamId);
+
+                user.Team = team;
+                user.Email = model.Email;
+                user.Name = model.Name;
+
+                var userRoles = await _userManager.GetRolesAsync(user);
+                await _userManager.RemoveFromRolesAsync(user, userRoles);
+                await _userManager.AddToRolesAsync(user!, model.SelectedRoles); // TODO: what is no roles??
+
+                try
+                {
+                    _context.Update(user);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    throw;
+                }
             }
 
-            return View(model);
+            return RedirectToAction(nameof(Index));
         }
     }
 }
