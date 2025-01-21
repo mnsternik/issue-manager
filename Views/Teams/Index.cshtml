@@ -1,0 +1,76 @@
+﻿@model IssueManager.Models.ViewModels.Teams.TeamsListViewModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<div class="container py-5">
+    <div class="im-container">
+        <div class="im-header">
+            <h2 class="mb-0">Teams Management</h2>
+            <p class="mb-0 opacity-75">View and manage all teams</p>
+        </div>
+
+        <form asp-controller="Teams" asp-action="Index" method="get">
+            <div class="d-flex gap-1 col-sm-6 mb-3">
+                <input class="form-control im-form-control" type="text" name="search" placeholder="Search by team name" />
+                <input type="submit" value="Search" class="create-btn" />
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table im-table">
+                <thead>
+                    <tr>
+                        <th>@Html.DisplayNameFor(model => model.Teams[0].Name)</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Teams)
+                    {
+                        <tr>
+                            <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                            <td style="text-align: right">
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-edit">Edit</a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-delete">Delete</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <nav>
+            <ul class="pagination">
+                @if (Model.Teams.HasPreviousPage)
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-route-pageIndex="@(Model.Teams.PageIndex - 1)" asp-route-search="@Model.SearchString">Previous</a>
+                    </li>
+                }
+                else
+                {
+                    <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                }
+
+                @for (int i = 1; i <= Model.Teams.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.Teams.PageIndex ? "active" : "")">
+                        <a class="page-link" asp-route-pageIndex="@i" asp-route-search="@Model.SearchString">@i</a>
+                    </li>
+                }
+
+                @if (Model.Teams.HasNextPage)
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-route-pageIndex="@(Model.Teams.PageIndex + 1)" asp-route-search="@Model.SearchString">Next</a>
+                    </li>
+                }
+                else
+                {
+                    <li class="page-item disabled"><span class="page-link">Next</span></li>
+                }
+            </ul>
+        </nav>
+    </div>
+</div>
