@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace IssueManager.Helpers
+namespace IssueManager.Utilities
 {
     public class PaginatedList<T> : List<T>
     {
