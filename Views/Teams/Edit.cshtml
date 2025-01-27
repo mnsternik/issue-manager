@@ -4,10 +4,10 @@
     ViewData["Title"] = "Edit";
 }
 
-<div class="container py-5">
+<div class="container">
     <div class="row justify-content-center">
         <div class="col-md-10 col-lg-8">
-            <div class="im-container">
+            <div class="app-container">
                 <form asp-action="Edit">
                     <div class="d-flex justify-content-between">
                         <a asp-action="Index" class="back-link">
@@ -19,7 +19,7 @@
                         <button type="submit" class="create-btn" style="margin-bottom: 8px">Save changes</button>
                     </div>
 
-                    <div class="im-header">
+                    <div class="app-header">
                         <h2 class="mb-0 fs-3">Edit team: @Model.Name</h2>
                         <p class="mb-0 opacity-75">Team ID: @Model.Id</p>
                     </div>
@@ -31,7 +31,7 @@
                     <div class="row g-4">
                         <div class="col-12">
                             <div class="form-floating">
-                                <input asp-for="Name" class="form-control im-form-control" placeholder="Enter name" />
+                                <input asp-for="Name" class="form-control app-form-control" placeholder="Enter name" />
                                 <label asp-for="Name"></label>
                                 <span asp-validation-for="Name" class="validation-message"></span>
                             </div>
