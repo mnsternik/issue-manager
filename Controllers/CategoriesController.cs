@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using IssueManager.Data;
 using IssueManager.Models;
-using IssueManager.Models.ViewModels.Teams;
 using IssueManager.Utilities;
 using AutoMapper;
 using IssueManager.Models.ViewModels.Categories;
@@ -51,19 +50,26 @@ namespace IssueManager.Controllers
             return View();
         }
 
+        // POST: Teams/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name")] CreateCategoryViewModel viewModel)
+        public async Task<IActionResult> Create([Bind("Id,Name")] CreateCategoryViewModel categoryViewModel)
         {
             if (ModelState.IsValid)
             {
-                var category = _mapper.Map<Category>(viewModel); 
+                if (CategoryNameExists(categoryViewModel.Name))
+                {
+                    ModelState.AddModelError("Name", "Category with this name already exists");
+                    return View(categoryViewModel); 
+                }
+
+                var category = _mapper.Map<Category>(categoryViewModel); 
 
                 _context.Add(category);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(viewModel);
+            return View(categoryViewModel);
         }
 
         // GET: Categories/Edit/5
@@ -83,8 +89,6 @@ namespace IssueManager.Controllers
         }
 
         // POST: Categories/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name")] Category category)
@@ -96,6 +100,12 @@ namespace IssueManager.Controllers
 
             if (ModelState.IsValid)
             {
+                if (CategoryNameExists(category.Name))
+                {
+                    ModelState.AddModelError("Name", "Category with this name already exists");
+                    return View(category);
+                }
+
                 try
                 {
                     _context.Update(category);
@@ -103,7 +113,7 @@ namespace IssueManager.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CategoryExists(category.Id))
+                    if (!CategoryIdExists(category.Id))
                     {
                         return NotFound();
                     }
@@ -150,9 +160,14 @@ namespace IssueManager.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool CategoryExists(int id)
+        private bool CategoryIdExists(int id)
         {
             return _context.Categories.Any(e => e.Id == id);
+        }
+
+        private bool CategoryNameExists(string name)
+        {
+            return _context.Categories.Any(c => c.Name == name); 
         }
     }
 }
