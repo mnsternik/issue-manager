@@ -1,7 +1,7 @@
-﻿.create-btn {
-    background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+﻿.app-btn {
     border: none;
     padding: 0.75rem 1.5rem;
+    white-space: nowrap;
     border-radius: 10px;
     font-weight: 600;
     letter-spacing: 0.5px;
@@ -10,37 +10,50 @@
     text-decoration: none;
 }
 
-.create-btn:hover {
+.app-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
     color: white;
 }
 
+.app-btn-main {
+    background-color: var(--app-main-color);
+}
 
-.action-btn {
-    padding: 0.4rem 0.75rem;
-    border-radius: 6px;
-    font-size: 0.875rem;
+.app-btn-create {
+    background-color: var(--create-button-color);
+}
+
+.app-btn-edit {
+    background-color: var(--edit-button-color);
+}
+
+.app-btn-details {
+    background-color: var(--app-secondary-color);
+}
+
+.app-btn-delete {
+    background-color: var(--delete-button-color);
+}
+
+.app-link {
+    color: var(--link-color);
     text-decoration: none;
-    transition: all 0.2s ease;
-    margin: 0 0.2rem;
+    font-weight: 500;
+    padding: 6px 12px;
+    letter-spacing: 0.4px;
+    border: none;
+    background: none;
 }
 
-.action-btn:hover {
-    transform: translateY(-1px);
+.app-link-main {
+    color: var(--app-main-color);
 }
 
-.btn-edit {
-    background-color: #3b82f6;
-    color: white;
+.app-link-delete {
+    color: var(--delete-button-color);
 }
 
-.btn-details {
-    background-color: #10b981;
-    color: white;
-}
-
-.btn-delete {
-    background-color: #ef4444;
-    color: white;
+.app-link-edit {
+    color: var(--edit-button-color);
 }

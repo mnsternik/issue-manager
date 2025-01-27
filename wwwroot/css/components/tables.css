@@ -1,37 +1,49 @@
-﻿.im-table {
+﻿.app-table {
     border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
-.im-table thead {
+.app-table thead {
     background: linear-gradient(145deg, #f3f4f6 0%, #e5e7eb 100%);
 }
 
-.im-table th {
+.app-table th {
     font-weight: 600;
     color: #374151;
     padding: 1rem;
     white-space: nowrap;
 }
 
-.im-table td {
+.app-table td {
     padding: 1rem;
     vertical-align: middle;
 }
 
-.im-table tbody tr {
+.app-table tbody tr {
     transition: all 0.2s ease;
 }
 
-.im-table tbody tr:hover {
+.app-table tbody tr:hover {
     background-color: rgba(59, 130, 246, 0.05);
 }
 
-.im-badge {
+.app-badge {
     padding: 0.35rem 0.75rem;
     border-radius: 20px;
     font-size: 0.875rem;
     font-weight: 500;
 }
+
+/*.app-page-item a
+{
+    color: black;
+}*/
+
+.app-page-item.active a {
+    background-color: var(--app-secondary-color) !important;
+    color: white;
+    border: none;
+}
+
 

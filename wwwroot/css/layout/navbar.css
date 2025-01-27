@@ -1,15 +1,10 @@
-﻿.navbar {
-    height: var(--navbar-height);
-    background: #3E7AF4 !important;
+﻿.app-navbar {
+    background: var(--app-main-color) !important;
     z-index: 1;
 }
 
-.navbar-bg {
-    background: #3E7AF4 !important;
-}
-
 .navbar-brand {
-    color: white !important;
+    color: var(--navbar-font-color) !important;
     font-weight: 700;
     font-size: 1.5rem;
     padding: 0.5rem 1rem;
@@ -22,7 +17,7 @@
     }
 
 .nav-item a, .nav-item button {
-    color: white !important;
+    color: var(--navbar-font-color) !important;
 }
 
 .nav-item.dropdown {
@@ -31,12 +26,12 @@
 }
 
 .dropdown-menu {
-    background: #3E7AF4 !important;
+    background: var(--app-main-color) !important;
     width: 100%;
 }
 
 .nav-link {
-    color: white;
+    color: var(--navbar-font-color) !important;
     font-weight: 500;
     padding: 0.5rem 1rem !important;
     white-space: nowrap;
@@ -65,7 +60,7 @@ button.nav-link {
 .navbar-toggler {
     border: none;
     padding: 0.5rem;
-    color: white;
+    color: var(--navbar-font-color) !important;
     background: rgba(255, 255, 255, 0.1);
 }
 

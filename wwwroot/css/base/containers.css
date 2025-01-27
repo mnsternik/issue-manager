@@ -1,5 +1,5 @@
-﻿.im-header {
-    background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+﻿.app-header {
+    background: var(--app-secondary-color);
     color: white;
     padding: 1.5rem;
     border-radius: 15px;
@@ -7,7 +7,7 @@
     box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
 }
 
-.im-container {
+.app-container {
     background: linear-gradient(145deg, #f3f4f6 0%, #ffffff 100%);
     border-radius: 20px;
     padding: 2rem;
