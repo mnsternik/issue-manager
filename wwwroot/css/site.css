@@ -6,7 +6,16 @@
 @import url('./layout/navbar.css');
 
 :root {
-    --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+    --app-main-color: #1E293B;
+    --app-secondary-color: #334155;
+    --app-background-color: #F1F5F9;
+    --navbar-font-color: #F8FAFC;
+    --create-button-color: #10B981;
+    --edit-button-color: #3B82F6;
+    --delete-button-color: #EF4444;
+    --cancel-button-color: #9CA3AF;
+    --link-color: #3B82F6;
+    --border-color: #E2E8F0;
     --navbar-height: 70px;
 }
 
@@ -16,9 +25,9 @@
   }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+/*.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-check-input:focus {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
+}*/
 
 html {
     position: relative;
@@ -27,6 +36,8 @@ html {
 }
 
 body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--app-background-color);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -37,4 +48,8 @@ main {
     flex: 1;
     padding: 2rem 0;
     margin-bottom: 102px; 
+}
+
+.main-color {
+    background-color: var(--app-main-color);
 }
