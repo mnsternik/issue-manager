@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using IssueManager.Data;
 using IssueManager.Models;
-using IssueManager.Models.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
-using IssueManager.Helpers;
+using IssueManager.Utilities;
 using AutoMapper;
+using IssueManager.Models.ViewModels.Requests;
 
 namespace IssueManager.Controllers
 {
@@ -25,26 +25,23 @@ namespace IssueManager.Controllers
         }
 
         // GET: Requests
-        public async Task<IActionResult> Index(string search, int pageIndex = 1)
+        [HttpGet]
+        public async Task<IActionResult> Index(RequestSearchFilters filters, int pageIndex = 1)
         {
             const int pageSize = 10;
 
-            IQueryable<Request> query = _context.Requests;
-
-            if (!string.IsNullOrEmpty(search))
-            {
-                query = query.Where(r => r.Title.ToLower().Contains(search));
-            }
-
-            IQueryable<RequestsListItemViewModel> mappedQuery = _mapper.ProjectTo<RequestsListItemViewModel>(query);
-
-            var paginatedRequestsList = await PaginatedList<RequestsListItemViewModel>.CreateAsync(mappedQuery, pageIndex, pageSize);
+            IQueryable<Request> filteredQuery = ApplyFiltersToQuery(_context.Requests, filters); 
+            IQueryable<RequestsListItemViewModel> mappedQuery = _mapper.ProjectTo<RequestsListItemViewModel>(filteredQuery);
 
             var requestsListViewModel = new RequestsListViewModel
             {
-                Requests = paginatedRequestsList,
-                SearchString = search
+                Requests = await PaginatedList<RequestsListItemViewModel>.CreateAsync(mappedQuery, pageIndex, pageSize),
+                Filters = filters
             };
+
+            ViewData["TeamSelectOptions"] = new SelectList(_context.Teams, "Id", "Name");
+            ViewData["UserSelectOptions"] = new SelectList(_context.Users, "Id", "Name");
+            ViewData["CategorySelectOptions"] = new SelectList(_context.Categories, "Id", "Name");
 
             return View(requestsListViewModel);
         }
@@ -66,16 +63,21 @@ namespace IssueManager.Controllers
                 return NotFound();
             }
 
-
             var user = await _userManager.GetUserAsync(User);
             if (user != null)
             {
-                var teamName = await _context.Users
+                var userRoles = await _userManager.GetRolesAsync(user);
+
+                var currentUserTeamId = await _context.Users
                     .Where(u => u.Id == user.Id)
-                    .Select(u => u.Team!.Name)
+                    .Select(u => u.Team!.Id)
                     .FirstOrDefaultAsync();
 
-                requestViewModel.AllowAssign = teamName == requestViewModel.AssignedTeamName; // TODO: Change it to compare ID's, not names. 
+                // Allow assign if request is not assigned to user yet, but is assigned to the team of current user, or current user is admin (and he is not yet assigned to task)
+                requestViewModel.AllowAssign =
+                    (currentUserTeamId == requestViewModel.AssignedTeamId && requestViewModel.AssignedTeamId == null)
+                    || (userRoles.Contains("Admin") && requestViewModel.AssignedUserId != user.Id);
+
                 requestViewModel.AllowEdit = user.Name == requestViewModel.AssignedUserName;
             }
 
@@ -102,7 +104,7 @@ namespace IssueManager.Controllers
             {
                 var request = _mapper.Map<Request>(viewModel);
                 request.Status = RequestStatus.Open;
-                request.AuthorId = _userManager.GetUserId(User)!; 
+                request.AuthorId = _userManager.GetUserId(User)!;
 
                 _context.Add(request);
                 await _context.SaveChangesAsync();
@@ -110,6 +112,36 @@ namespace IssueManager.Controllers
             }
 
             return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Assign(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var request = await _context.Requests.FindAsync(id);
+
+            if (request == null)
+            {
+                return NotFound();
+            };
+
+            request.AssignedUser = user;
+            request.AssignedUserId = user!.Id;
+            request.UpdateDate = DateTime.UtcNow;
+
+            try
+            {
+                _context.Update(request);
+                await _context.SaveChangesAsync();
+
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                throw; 
+            }
+
+            return RedirectToAction(nameof(Details), new { Id = id});
         }
 
         // GET: Requests/Edit/5
@@ -122,7 +154,7 @@ namespace IssueManager.Controllers
 
             var requestViewModel = await _mapper
                 .ProjectTo<EditRequestViewModel>(_context.Requests.AsNoTracking())
-                .FirstOrDefaultAsync(r => r.Id == id); 
+                .FirstOrDefaultAsync(r => r.Id == id);
 
             if (requestViewModel == null)
             {
@@ -149,7 +181,7 @@ namespace IssueManager.Controllers
             if (ModelState.IsValid)
             {
                 var request = _mapper.Map<Request>(requestViewModel);
-                request.UpdateDate = DateTime.UtcNow; 
+                request.UpdateDate = DateTime.UtcNow;
 
                 try
                 {
@@ -197,7 +229,7 @@ namespace IssueManager.Controllers
             _context.RequestResponses.Add(response);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("Details", new { id = requestId });
+            return RedirectToAction("Edit", new { id = requestId });
         }
 
         // GET: Requests/Delete/5
@@ -239,6 +271,60 @@ namespace IssueManager.Controllers
         private bool RequestExists(int id)
         {
             return _context.Requests.Any(e => e.Id == id);
+        }
+
+        private IQueryable<Request> ApplyFiltersToQuery(IQueryable<Request> query, RequestSearchFilters filters)
+        {
+            if (!string.IsNullOrWhiteSpace(filters.Id))
+            {
+                query = query.Where(r => r.Id.ToString().Contains(filters.Id));
+            }
+            if (!string.IsNullOrWhiteSpace(filters.Title))
+            {
+                query = query.Where(r => r.Title.Contains(filters.Title));
+            }
+            if (filters.Priority.HasValue)
+            {
+                query = query.Where(r => r.Priority == filters.Priority);
+            }
+            if (filters.Status.HasValue)
+            {
+                query = query.Where(r => r.Status == filters.Status);
+            }
+            if (filters.CategoryId.HasValue)
+            {
+                query = query.Where(r => r.CategoryId == filters.CategoryId);
+            }
+            if (!string.IsNullOrWhiteSpace(filters.AssignedUserId))
+            {
+                query = query.Where(r => r.AssignedUserId == filters.AssignedUserId);
+            }
+            if (!string.IsNullOrWhiteSpace(filters.AuthorId))
+            {
+                query = query.Where(r => r.AuthorId == filters.AuthorId);
+            }
+            if (filters.AssignedTeamId.HasValue)
+            {
+                query = query.Where(r => r.AssignedTeamId == filters.AssignedTeamId);
+            }
+            if (filters.CreatedBefore.HasValue)
+            {
+                query = query.Where(r => r.CreateDate <= filters.CreatedBefore);
+            }
+            if (filters.CreatedAfter.HasValue)
+            {
+                query = query.Where(r => r.CreateDate >= filters.CreatedAfter);
+            }
+            if (filters.UpdatedBefore.HasValue)
+            {
+                query = query.Where(r => r.UpdateDate <= filters.UpdatedBefore);
+            }
+            if (filters.UpdatedAfter.HasValue)
+            {
+                query = query.Where(r => r.UpdateDate >= filters.UpdatedAfter);
+            }
+
+            return query; 
         }
     }
 }
