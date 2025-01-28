@@ -21,7 +21,6 @@
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0 0 12px 12px;
 }
 
 .back-link:hover {

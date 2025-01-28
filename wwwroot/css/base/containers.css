@@ -8,6 +8,7 @@
 }
 
 .app-container {
+    min-width: 400px;
     background: linear-gradient(145deg, #f3f4f6 0%, #ffffff 100%);
     border-radius: 20px;
     padding: 2rem;

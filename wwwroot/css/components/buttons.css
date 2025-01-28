@@ -36,6 +36,11 @@
     background-color: var(--delete-button-color);
 }
 
+.app-btn-cancel {
+    color: var(--app-main-color);
+    background-color: var(--cancel-button-color);
+}
+
 .app-link {
     color: var(--link-color);
     text-decoration: none;
