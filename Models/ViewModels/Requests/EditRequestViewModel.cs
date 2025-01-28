@@ -22,6 +22,7 @@ namespace IssueManager.Models.ViewModels.Requests
 
         public DateTime CreateDate { get; set; }
 
+        [Display(Name = "Last update date")]
         public DateTime? UpdateDate { get; set; }
 
         public string AuthorName { get; set; }

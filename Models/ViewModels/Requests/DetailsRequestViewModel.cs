@@ -21,9 +21,11 @@ namespace IssueManager.Models.ViewModels.Requests
 
         [Display(Name = "Assigned user")]
         public string? AssignedUserName { get; set; } = "Not Assigned";
+        public string? AssignedUserId { get; set; }
 
         [Display(Name = "Assigned team")]
         public string? AssignedTeamName { get; set; } = "Not Assigned";
+        public int? AssignedTeamId { get; set; }
 
         [Display(Name = "Author name")]
         public string AuthorName { get; set; }

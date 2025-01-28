@@ -1,4 +1,4 @@
-﻿using IssueManager.Helpers;
+﻿using IssueManager.Utilities;
 
 namespace IssueManager.Models.ViewModels.UserManagement
 {
