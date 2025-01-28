@@ -3,15 +3,149 @@
     ViewData["Title"] = "Requests";
 }
 
-<div class="container py-5">
-    <div class="im-container">
-        <div class="im-header">
+<div class="container">
+    <div class="app-container">
+        <div class="app-header">
             <h2 class="mb-0">Request Management</h2>
             <p class="mb-0 opacity-75">View and manage all requests</p>
         </div>
 
+        <p class="d-inline-flex gap-1">
+            <button class="app-btn app-btn-main" type="button" data-bs-toggle="collapse" data-bs-target="#requestsFilters" aria-expanded="false" aria-controls="requestsFilters">
+                Show filters
+            </button>
+        </p>
+        <div class="collapse" id="requestsFilters">
+            <form asp-action="Index" method="get" class="d-flex flex-column gap-1">
+                <div class="row g-1">
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <input asp-for="Filters.Id" class="form-control app-form-control" placeholder="Enter ID" />
+                            <label asp-for="Filters.Id"></label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <input asp-for="Filters.Title" class="form-control app-form-control" placeholder="Enter title" />
+                            <label asp-for="Filters.Title"></label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <input asp-for="Filters.Description" class="form-control app-form-control" placeholder="Enter description" />
+                            <label asp-for="Filters.Description"></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-1">
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <select asp-for="Filters.Priority" class="form-select app-form-control"
+                                    asp-items="@Html.GetEnumSelectList(typeof(RequestPriority))">
+                                <option value="">-- Select --</option>
+                            </select>
+                            <label asp-for="Filters.Priority"></label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <select asp-for="Filters.Status" class="form-select app-form-control"
+                                    asp-items="@Html.GetEnumSelectList(typeof(RequestStatus))">
+                                <option value="">-- Select --</option>
+                            </select>
+                            <label asp-for="Filters.Status"></label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <select asp-for="Filters.CategoryId" class="form-select app-form-control"
+                                    asp-items="ViewBag.CategorySelectOptions">
+                                <option value="">-- Select --</option>
+                            </select>
+                            <label asp-for="Filters.CategoryId"></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-1">
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <select asp-for="Filters.AuthorId" class="form-select app-form-control"
+                                    asp-items="ViewBag.UserSelectOptions">
+                                <option value="">-- Select --</option>
+                            </select>
+                            <label asp-for="Filters.AuthorId"></label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <select asp-for="Filters.AssignedUserId" class="form-select app-form-control"
+                                    asp-items="ViewBag.UserSelectOptions">
+                                <option value="">-- Select --</option>
+                            </select>
+                            <label asp-for="Filters.AssignedUserId"></label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <select asp-for="Filters.AssignedTeamId" class="form-select app-form-control"
+                                    asp-items="ViewBag.TeamSelectOptions">
+                                <option value="">-- Select --</option>
+                            </select>
+                            <label asp-for="Filters.AssignedTeamId"></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-1">
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <input asp-for="Filters.CreatedBefore" class="form-control app-form-control" type="date" />
+                            <label asp-for="Filters.CreatedBefore"></label>
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <input asp-for="Filters.CreatedAfter" class="form-control app-form-control" type="date" />
+                            <label asp-for="Filters.CreatedAfter"></label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <input asp-for="Filters.UpdatedBefore" class="form-control app-form-control" type="date" />
+                            <label asp-for="Filters.UpdatedBefore"></label>
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <input asp-for="Filters.UpdatedAfter" class="form-control app-form-control" type="date" />
+                            <label asp-for="Filters.UpdatedAfter"></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="my-2">
+                    <button type="submit" class="app-btn app-btn-main">Search</button>
+                    <button type="button" onclick="resetFilters()" class="app-btn app-btn-cancel">Reset</button>
+                </div>
+
+            </form>
+        </div>
+
         <div class="table-responsive">
-            <table class="table im-table">
+            <table class="table app-table">
                 <thead>
                     <tr>
                         <th>@Html.DisplayNameFor(model => model.Requests[0].Title)</th>
@@ -31,13 +165,13 @@
                             style="cursor: pointer">
                             <td>@Html.DisplayFor(modelItem => item.Title)</td>
                             <td>
-                                <span class="im-badge @(item.Status.ToString().ToLower())"
+                                <span class="app-badge @(item.Status.ToString().ToLower())"
                                       style="background-color: @GetStatusColor(item.Status)">
                                     @Html.DisplayFor(modelItem => item.Status)
                                 </span>
                             </td>
                             <td>
-                                <span class="im-badge"
+                                <span class="app-badge"
                                       style="background-color: @GetPriorityColor(item.Priority)">
                                     @Html.DisplayFor(modelItem => item.Priority)
                                 </span>
@@ -57,7 +191,7 @@
                 @if (Model.Requests.HasPreviousPage)
                 {
                     <li class="page-item">
-                        <a class="page-link" asp-route-pageIndex="@(Model.Requests.PageIndex - 1)" asp-route-search="@Model.SearchString">Previous</a>
+                        <a class="page-link" asp-route-pageIndex="@(Model.Requests.PageIndex - 1)">Previous</a>
                     </li>
                 }
                 else
@@ -67,15 +201,15 @@
 
                 @for (int i = 1; i <= Model.Requests.TotalPages; i++)
                 {
-                    <li class="page-item @(i == Model.Requests.PageIndex ? "active" : "")">
-                        <a class="page-link" asp-route-pageIndex="@i" asp-route-search="@Model.SearchString">@i</a>
+                    <li class="page-item app-page-item @(i == Model.Requests.PageIndex ? "active" : "")">
+                        <a class="page-link" asp-route-pageIndex="@i">@i</a>
                     </li>
                 }
 
                 @if (Model.Requests.HasNextPage)
                 {
                     <li class="page-item">
-                        <a class="page-link" asp-route-pageIndex="@(Model.Requests.PageIndex + 1)" asp-route-search="@Model.SearchString">Next</a>
+                        <a class="page-link" asp-route-pageIndex="@(Model.Requests.PageIndex + 1)">Next</a>
                     </li>
                 }
                 else
@@ -86,6 +220,12 @@
         </nav>
     </div>
 </div>
+
+<script>
+    function resetFilters() {
+        window.location.href = window.location.pathname;
+    }
+</script>
 
 @functions {
     private string GetStatusColor(RequestStatus status)
