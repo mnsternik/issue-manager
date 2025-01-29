@@ -8,7 +8,6 @@ namespace IssueManager.Models
         public string AuthorId { get; set; }
         public int RequestId { get; set; }
         public DateTime CreateDate { get; set; }
-
         [Required]
         public string ResponseText { get; set; }
 

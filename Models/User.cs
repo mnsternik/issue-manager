@@ -5,11 +5,14 @@ namespace IssueManager.Models
 {
     public class User : IdentityUser
     {
-        [MaxLength(100)]
-        public string? FullName { get; set; }
+        [Required]
+        [MaxLength(50)]
+        public string? Name { get; set; }
 
-        public int? TeamId { get; set; } 
+        [Required]
+        public int TeamId { get; set; }
 
-        public Team? Team { get; set; }
+        [Required]
+        public Team Team { get; set; }
     }
 }

@@ -1,10 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace IssueManager.Models
 {
     public class Request
     {
-        [Key]
         public int Id { get; set; } 
 
         [Required]
@@ -21,28 +21,36 @@ namespace IssueManager.Models
         [Required]
         public RequestPriority Priority { get; set; }
 
-        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+        [Required]
+        public DateTime CreateDate { get; set; } = DateTime.UtcNow;
 
-        public DateTime? UpdatedDate { get; set; }
-
-        public ICollection<Attachment>? Attachments { get; set; }
+        public DateTime? UpdateDate { get; set; } = DateTime.UtcNow;
 
         [Required]
-        public int CategoryId { get; set; } 
+        public int CategoryId { get; set; }
+
+        [Required]
+        [ForeignKey(nameof(Author))]
+        public string AuthorId { get; set; }
+
+        [ForeignKey(nameof(AssignedUser))]
+        public string? AssignedUserId { get; set; } 
+
+        public int? AssignedTeamId { get; set; }
+        public Team? AssignedTeam { get; set; }
+
         public Category Category { get; set; }
-
-        public string? AssignedToUserId { get; set; } 
-        public User? AssignedToUser { get; set; }
-
-        public int? AssignedToTeamId { get; set; }
-        public Team? AssignedToTeam { get; set; }
+        public User Author { get; set; }
+        public User? AssignedUser { get; set; }
+        public ICollection<RequestResponse>? Responses { get; set; }
+        public ICollection<Attachment>? Attachments { get; set; }
     }
 
     public enum RequestStatus
     {
-        New,         
+        Open,         
         InProgress,  
-        Completed,   
+        Resolved,   
         Closed       
     }
 
