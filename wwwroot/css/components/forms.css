@@ -49,6 +49,7 @@
 }
 
 .details-label {
+    margin-bottom: 0; 
     padding-left: 8px;
     padding-bottom: 2px;
     opacity: 0.75;
