@@ -3,15 +3,31 @@
     ViewData["Title"] = "UserManagement";
 }
 
-<div class="container py-5">
-    <div class="im-container">
-        <div class="im-header">
-            <h2 class="mb-0">User Management</h2>
+<div class="container">
+    <div class="app-container">
+        <div class="app-header">
+            <h2 class="mb-0">Users Management</h2>
             <p class="mb-0 opacity-75">View and manage all user's roles and teams</p>
         </div>
 
+        <div class="d-flex flex-column flex-md-row-reverse gap-3 gap-md-0 justify-content-between mb-3" style="align-items:baseline">
+            <div class="col-12 col-md-6" style="text-align: end">
+                <a asp-action="Create" class="app-btn app-btn-create">Create</a>
+            </div>
+            <form class="col-12 col-md-6" asp-controller="UserManagement" asp-action="Index" method="get">
+                <div class="d-flex gap-1">
+                    <input class="form-control app-form-control w-100" type="text" name="search" placeholder="Search by name or email" />
+                    <button type="submit" class="app-link app-link-main">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-search btn-icon" viewBox="0 0 16 16">
+                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+                        </svg>
+                    </button>
+                </div>
+            </form>
+        </div>
+
         <div class="table-responsive">
-            <table class="table im-table">
+            <table class="table app-table">
                 <thead>
                     <tr>
                         <th>@Html.DisplayNameFor(model => model.Users[0].Name)</th>
@@ -46,7 +62,7 @@
 
                 @for (int i = 1; i <= Model.Users.TotalPages; i++)
                 {
-                    <li class="page-item @(i == Model.Users.PageIndex ? "active" : "")">
+                    <li class="page-item app-page-item @(i == Model.Users.PageIndex ? "active" : "")">
                         <a class="page-link" asp-route-pageIndex="@i" asp-route-search="@Model.SearchString">@i</a>
                     </li>
                 }

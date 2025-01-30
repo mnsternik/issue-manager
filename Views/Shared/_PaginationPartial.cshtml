@@ -1,0 +1,35 @@
+﻿@model IssueManager.Utilities.PaginatedList<object>
+@{
+    string routeName = ViewData["RouteName"] as string ?? "";
+}
+
+<ul class="pagination">
+    @if (Model.HasPreviousPage)
+    {
+        <li class="page-item">
+            <a class="page-link" asp-route-@routeName-pageIndex="@(Model.PageIndex - 1)">Previous</a>
+        </li>
+    }
+    else
+    {
+        <li class="page-item disabled"><span class="page-link">Previous</span></li>
+    }
+
+    @for (int i = 1; i <= Model.TotalPages; i++)
+    {
+        <li class="page-item app-page-item @(i == Model.PageIndex ? "active" : "")">
+            <a class="page-link" asp-route-@routeName-pageIndex="@i">@i</a>
+        </li>
+    }
+
+    @if (Model.HasNextPage)
+    {
+        <li class="page-item">
+            <a class="page-link" asp-route-@routeName-pageIndex="@(Model.PageIndex + 1)">Next</a>
+        </li>
+    }
+    else
+    {
+        <li class="page-item disabled"><span class="page-link">Next</span></li>
+    }
+</ul>

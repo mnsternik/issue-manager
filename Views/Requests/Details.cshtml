@@ -4,12 +4,12 @@
     ViewData["Title"] = "Details";
 }
 
-<div class="container py-5">
+<div class="container">
     <div class="row justify-content-center">
         <div class="col-md-10 col-lg-8">
-            <div class="im-container">
+            <div class="app-container">
 
-                <div class="d-flex justify-content-between">
+                <div class="d-flex justify-content-between mb-2">
                     <a asp-action="Index" class="back-link">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
                             <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z" />
@@ -18,16 +18,19 @@
                     </a>
                     @if (Model.AllowAssign)
                     {
-                        <a asp-action="Edit" asp-route-id="@Model?.Id" class="create-btn" style="margin-bottom: 8px">Assign to me</a>
+                        <form asp-action="Assign" method="post">
+                            <input type="hidden" asp-for="Id" /> 
+                            <button class="app-btn app-btn-main" type="submit">Assign to me</button>
+                        </form>
                     }
                     @if (Model.AllowEdit)
                     {
-                        <a asp-action="Edit" asp-route-id="@Model?.Id" class="create-btn" style="margin-bottom: 8px">Edit</a>
+                        <a asp-action="Edit" asp-route-id="@Model?.Id" class="app-btn app-btn-main">Edit</a>
                     }
                 </div>
 
 
-                <div class="im-header">
+                <div class="app-header">
                     <h2 class="mb-0 fs-3">Request ID: @Model.Id</h2>
                     <p class="mb-0 opacity-75">Created at @Model.CreateDate by @Model.AuthorName</p>
                 </div>
