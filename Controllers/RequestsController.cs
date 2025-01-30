@@ -161,6 +161,14 @@ namespace IssueManager.Controllers
                 return NotFound();
             }
 
+            ViewBag.UsersByTeam = _context.Users
+                .GroupBy(u => u.TeamId)
+                .ToDictionary(
+                    g => g.Key.ToString(),
+                    g => g.Select(u => new { id = u.Id, name = u.Name }).ToList()
+                );
+
+
             ViewData["TeamSelectOptions"] = new SelectList(_context.Teams, "Id", "Name", requestViewModel.AssignedTeamId);
             ViewData["UserSelectOptions"] = new SelectList(_context.Users, "Id", "Name", requestViewModel.AssignedUserId);
             ViewData["CategorySelectOptions"] = new SelectList(_context.Categories, "Id", "Name", requestViewModel.CategoryId);

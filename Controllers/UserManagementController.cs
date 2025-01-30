@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using IssueManager.Data;
-using IssueManager.Helpers;
 using IssueManager.Models;
 using IssueManager.Models.ViewModels.UserManagement;
+using IssueManager.Utilities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -30,6 +30,7 @@ namespace IssueManager.Controllers
             _mapper = mapper;
         }
 
+        [HttpGet]
         public async Task<IActionResult> Index(string search, int pageIndex = 1)
         {
             const int pageSize = 10;
@@ -52,6 +53,59 @@ namespace IssueManager.Controllers
             };
 
             return View(usersListViewModel);
+        }
+
+        [HttpGet]
+        public IActionResult Create()
+        {
+            var model = new CreateUserViewModel
+            {
+                AvailableRoles = _roleManager.Roles.Select(r => r.Name).ToList()!,
+                Teams = _context.Teams.Select(t => new SelectListItem
+                {
+                    Value = t.Id.ToString(),
+                    Text = t.Name
+                }).ToList()
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create(CreateUserViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = new User
+                {
+                    Name = model.Name,
+                    UserName = model.Email,
+                    Email = model.Email,
+                    TeamId = model.TeamId,
+
+                };
+
+                var result = await _userManager.CreateAsync(user, model.Password);
+
+                if (result.Succeeded)
+                {
+                    foreach (var role in model.SelectedRoles)
+                    {
+                        await _userManager.AddToRoleAsync(user, role);
+                    }
+
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+
+            model.AvailableRoles = _roleManager.Roles.Select(r => r.Name).ToList()!;
+            model.Teams = _context.Teams.Select(t => new SelectListItem
+            {
+                Value = t.Id.ToString(),
+                Text = t.Name
+            }).ToList();
+
+            return View(model); 
         }
 
         public async Task<IActionResult> ManageUser(string id)

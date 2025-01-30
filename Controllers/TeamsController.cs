@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using IssueManager.Data;
 using IssueManager.Models;
@@ -55,20 +50,27 @@ namespace IssueManager.Controllers
             return View();
         }
 
+
         // POST: Teams/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name")] Team team)
+        public async Task<IActionResult> Create([Bind("Id,Name")] CreateTeamViewModel teamViewModel)
         {
             if (ModelState.IsValid)
             {
+                if (TeamNameExists(teamViewModel.Name))
+                {
+                    ModelState.AddModelError("Name", "Team with this name already exists");
+                    return View(teamViewModel);
+                }
+
+                var team = _mapper.Map<Team>(teamViewModel); 
+
                 _context.Add(team);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(team);
+            return View(teamViewModel);
         }
 
         // GET: Teams/Edit/5
@@ -88,8 +90,6 @@ namespace IssueManager.Controllers
         }
 
         // POST: Teams/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name")] Team team)
@@ -101,6 +101,12 @@ namespace IssueManager.Controllers
 
             if (ModelState.IsValid)
             {
+                if (TeamNameExists(team.Name))
+                {
+                    ModelState.AddModelError("Name", "Team with this name already exists");
+                    return View(team);
+                }
+
                 try
                 {
                     _context.Update(team);
@@ -108,7 +114,7 @@ namespace IssueManager.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!TeamExists(team.Id))
+                    if (!TeamIdExists(team.Id))
                     {
                         return NotFound();
                     }
@@ -155,9 +161,14 @@ namespace IssueManager.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool TeamExists(int id)
+        private bool TeamIdExists(int id)
         {
             return _context.Teams.Any(e => e.Id == id);
+        }
+
+        private bool TeamNameExists(string name)
+        {
+            return _context.Teams.Any(e => e.Name == name);
         }
     }
 }
