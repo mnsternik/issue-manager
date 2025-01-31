@@ -39,7 +39,7 @@ namespace IssueManager.Controllers
 
             if (!string.IsNullOrEmpty(search))
             {
-                query = query.Where(r => r.Name.ToLower().Contains(search) || r.Email.ToLower().Contains(search));
+                query = query.Where(r => r.UserName.ToLower().Contains(search) || r.Email.ToLower().Contains(search));
             }
 
             IQueryable<UsersListItemViewModel> mappedQuery = _mapper.ProjectTo<UsersListItemViewModel>(query);
@@ -78,11 +78,9 @@ namespace IssueManager.Controllers
             {
                 var user = new User
                 {
-                    Name = model.Name,
-                    UserName = model.Email,
+                    UserName = model.UserName,
                     Email = model.Email,
                     TeamId = model.TeamId,
-
                 };
 
                 var result = await _userManager.CreateAsync(user, model.Password);
@@ -129,7 +127,7 @@ namespace IssueManager.Controllers
             var userViewModel = new ManageUserViewModel
             {
                 Id = user.Id,
-                Name = user.Name,
+                UserName = user.UserName,
                 Email = user.Email,
                 TeamId = user.TeamId,
                 TeamName = assignedTeam?.Name,
@@ -161,7 +159,7 @@ namespace IssueManager.Controllers
 
                 user.Team = team;
                 user.Email = model.Email;
-                user.Name = model.Name;
+                user.UserName = model.UserName;
 
                 var userRoles = await _userManager.GetRolesAsync(user);
                 await _userManager.RemoveFromRolesAsync(user, userRoles);

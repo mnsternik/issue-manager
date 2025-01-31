@@ -40,7 +40,7 @@ namespace IssueManager.Controllers
             };
 
             ViewData["TeamSelectOptions"] = new SelectList(_context.Teams, "Id", "Name");
-            ViewData["UserSelectOptions"] = new SelectList(_context.Users, "Id", "Name");
+            ViewData["UserSelectOptions"] = new SelectList(_context.Users, "Id", "UserName");
             ViewData["CategorySelectOptions"] = new SelectList(_context.Categories, "Id", "Name");
 
             return View(requestsListViewModel);
@@ -78,7 +78,7 @@ namespace IssueManager.Controllers
                     (currentUserTeamId == requestViewModel.AssignedTeamId && requestViewModel.AssignedTeamId == null)
                     || (userRoles.Contains("Admin") && requestViewModel.AssignedUserId != user.Id);
 
-                requestViewModel.AllowEdit = user.Name == requestViewModel.AssignedUserName;
+                requestViewModel.AllowEdit = user.UserName == requestViewModel.AssignedUserName;
             }
 
             return View(requestViewModel);
@@ -88,7 +88,7 @@ namespace IssueManager.Controllers
         public IActionResult Create()
         {
             ViewData["TeamSelectOptions"] = new SelectList(_context.Teams, "Id", "Name");
-            ViewData["UserSelectOptions"] = new SelectList(_context.Users, "Id", "Name");
+            ViewData["UserSelectOptions"] = new SelectList(_context.Users, "Id", "UserName");
             ViewData["CategorySelectOptions"] = new SelectList(_context.Categories, "Id", "Name");
 
             return View(new CreateRequestViewModel());
@@ -165,12 +165,12 @@ namespace IssueManager.Controllers
                 .GroupBy(u => u.TeamId)
                 .ToDictionary(
                     g => g.Key.ToString(),
-                    g => g.Select(u => new { id = u.Id, name = u.Name }).ToList()
+                    g => g.Select(u => new { id = u.Id, name = u.UserName }).ToList()
                 );
 
 
             ViewData["TeamSelectOptions"] = new SelectList(_context.Teams, "Id", "Name", requestViewModel.AssignedTeamId);
-            ViewData["UserSelectOptions"] = new SelectList(_context.Users, "Id", "Name", requestViewModel.AssignedUserId);
+            ViewData["UserSelectOptions"] = new SelectList(_context.Users, "Id", "UserName", requestViewModel.AssignedUserId);
             ViewData["CategorySelectOptions"] = new SelectList(_context.Categories, "Id", "Name", requestViewModel.CategoryId);
 
             return View(requestViewModel);
