@@ -11,12 +11,18 @@ namespace IssueManager.Mapping
     {
         public MappingProfile() 
         {
+
             CreateMap<CreateRequestViewModel, Request>();
             CreateMap<EditRequestViewModel, Request>(); 
-            CreateMap<Request, DetailsRequestViewModel>();
-            CreateMap<Request, EditRequestViewModel>();
-            CreateMap<Request, RequestsListItemViewModel>();
-            CreateMap<RequestResponse, RequestResponseViewModel>();
+            CreateMap<Request, DetailsRequestViewModel>()
+                .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author.UserName))
+                .ForMember(dest => dest.AssignedUserName, opt => opt.MapFrom(src => src.AssignedUser.UserName));
+            CreateMap<Request, EditRequestViewModel>()
+                .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author.UserName));
+            CreateMap<Request, RequestsListItemViewModel>()
+                .ForMember(dest => dest.AssignedUserName, opt => opt.MapFrom(src => src.AssignedUser.UserName));
+            CreateMap<RequestResponse, RequestResponseViewModel>()
+                .ForMember(dest => dest.AuthorName, opt => opt.MapFrom(src => src.Author.UserName));
 
             CreateMap<User, UsersListItemViewModel>();
             CreateMap<ManageUserViewModel, User>();
