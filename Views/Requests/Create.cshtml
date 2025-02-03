@@ -55,7 +55,7 @@
 
                         <div class="col-md-6">
                             <div class="form-floating">
-                                <select asp-for="AssignedUserId" class="form-select app-form-control"
+                                <select asp-for="AssignedUserId" class="form-select app-form-control" id="assignedUserSelect"
                                         asp-items="ViewBag.UserSelectOptions">
                                     <option value="">-- Select --</option>
                                 </select>
@@ -65,7 +65,7 @@
 
                         <div class="col-md-6">
                             <div class="form-floating">
-                                <select asp-for="AssignedTeamId" class="form-select app-form-control"
+                                <select asp-for="AssignedTeamId" class="form-select app-form-control" id="assignedTeamSelect"
                                         asp-items="ViewBag.TeamSelectOptions">
                                     <option value="">-- Select --</option>
                                 </select>
@@ -95,5 +95,11 @@
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
+
+        <script id="usersByTeamData" type="application/json">
+            @Html.Raw(Json.Serialize(ViewBag.UsersByTeam))
+        </script>
+
+        <script src="~/js/filterUsersByGroup.js"></script>
     }
 }
