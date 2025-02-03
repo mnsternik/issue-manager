@@ -30,7 +30,7 @@ namespace IssueManager.Controllers
         {
             const int pageSize = 10;
 
-            IQueryable<Request> filteredQuery = ApplyFiltersToQuery(_context.Requests, filters); 
+            IQueryable<Request> filteredQuery = ApplyFiltersToQuery(_context.Requests, filters);
             IQueryable<RequestsListItemViewModel> mappedQuery = _mapper.ProjectTo<RequestsListItemViewModel>(filteredQuery);
 
             var requestsListViewModel = new RequestsListViewModel
@@ -87,6 +87,13 @@ namespace IssueManager.Controllers
         // GET: Requests/Create
         public IActionResult Create()
         {
+            ViewBag.UsersByTeam = _context.Users
+                .GroupBy(u => u.TeamId)
+                .ToDictionary(
+                    g => g.Key.ToString(),
+                    g => g.Select(u => new { id = u.Id, name = u.UserName }).ToList()
+                );
+
             ViewData["TeamSelectOptions"] = new SelectList(_context.Teams, "Id", "Name");
             ViewData["UserSelectOptions"] = new SelectList(_context.Users, "Id", "UserName");
             ViewData["CategorySelectOptions"] = new SelectList(_context.Categories, "Id", "Name");
@@ -128,6 +135,9 @@ namespace IssueManager.Controllers
 
             request.AssignedUser = user;
             request.AssignedUserId = user!.Id;
+            request.AssignedTeam = user.Team;
+            request.AssignedTeamId = user.TeamId;
+            request.Status = RequestStatus.InProgress; 
             request.UpdateDate = DateTime.UtcNow;
 
             try
@@ -138,10 +148,10 @@ namespace IssueManager.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                throw; 
+                throw;
             }
 
-            return RedirectToAction(nameof(Details), new { Id = id});
+            return RedirectToAction(nameof(Details), new { Id = id });
         }
 
         // GET: Requests/Edit/5
@@ -332,7 +342,7 @@ namespace IssueManager.Controllers
                 query = query.Where(r => r.UpdateDate >= filters.UpdatedAfter);
             }
 
-            return query; 
+            return query;
         }
     }
 }
