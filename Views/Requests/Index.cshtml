@@ -160,29 +160,35 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model.Requests)
+                    @if (Model.Requests.Count == 0)
                     {
-                        <tr onclick="location.href = '@Url.Action("Details", "Requests", new { id = item.Id })'"
-                        style="cursor: pointer">
-                            <td>@ViewHelpers.Truncate(item.Title)</td>
-                            <td>
-                                <span class="app-badge @(item.Status.ToString().ToLower())"
-                                style="background-color: @ViewHelpers.GetStatusColor(item.Status)">
-                                    @Html.DisplayFor(modelItem => item.Status)
-                                </span>
-                            </td>
-                            <td>
-                                <span class="app-badge"
-                                style="background-color: @ViewHelpers.GetPriorityColor(item.Priority)">
-                                    @Html.DisplayFor(modelItem => item.Priority)
-                                </span>
-                            </td>
-                            <td>@item.CreateDate.ToString("MMM dd, yyyy")</td>
-                            <td>@item.UpdateDate?.ToString("MMM dd, yyyy")</td>
-                            <td>@Html.DisplayFor(modelItem => item.CategoryName)</td>
-                            <td>@Html.DisplayFor(modelItem => item.AssignedUserName)</td>
-                            <td>@Html.DisplayFor(modelItem => item.AssignedTeamName)</td>
-                        </tr>
+                        <tr><td colspan="12">No requests found</td></tr>
+                    } 
+                    else {
+                        foreach (var item in Model.Requests)
+                        {
+                            <tr onclick="location.href = '@Url.Action("Details", "Requests", new { id = item.Id })'"
+                                style="cursor: pointer">
+                                <td>@ViewHelpers.Truncate(item.Title)</td>
+                                <td>
+                                    <span class="app-badge @(item.Status.ToString().ToLower())"
+                                          style="background-color: @ViewHelpers.GetStatusColor(item.Status)">
+                                        @Html.DisplayFor(modelItem => item.Status)
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="app-badge"
+                                          style="background-color: @ViewHelpers.GetPriorityColor(item.Priority)">
+                                        @Html.DisplayFor(modelItem => item.Priority)
+                                    </span>
+                                </td>
+                                <td>@item.CreateDate.ToString("MMM dd, yyyy")</td>
+                                <td>@item.UpdateDate?.ToString("MMM dd, yyyy")</td>
+                                <td>@Html.DisplayFor(modelItem => item.CategoryName)</td>
+                                <td>@Html.DisplayFor(modelItem => item.AssignedUserName)</td>
+                                <td>@Html.DisplayFor(modelItem => item.AssignedTeamName)</td>
+                            </tr>
+                        }
                     }
                 </tbody>
             </table>
