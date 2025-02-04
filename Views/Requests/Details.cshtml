@@ -29,7 +29,6 @@
                     }
                 </div>
 
-
                 <div class="app-header">
                     <h2 class="mb-0 fs-3">Request ID: @Model.Id</h2>
                     <p class="mb-0 opacity-75">Created at @Model.CreateDate by @Model.AuthorName</p>
@@ -81,23 +80,25 @@
                     <div class="col-md-6">
                         <div class="d-flex flex-column">
                             <label class="details-label">Assigned Team</label>
-                            <span class="details-data">@Model.AssignedTeamName</span>
+                            <span class="details-data">
+                                @(string.IsNullOrEmpty(Model.AssignedTeamName) ? "Not Assigned" : Model.AssignedTeamName)
+                            </span>
                         </div>
                     </div>
 
                     <div class="col-md-6">
                         <div class="d-flex flex-column">
                             <label class="details-label">Assigned User</label>
-                            <span class="details-data">@Model.AssignedUserName</span>
+                            <span class="details-data">
+                                @(string.IsNullOrEmpty(Model.AssignedTeamName) ? "Not Assigned" : Model.AssignedUserName)
+                            </span>
                         </div>
                     </div>
                 </div>
-
                 <hr />
                 <div>
                     <partial name="_RequestResponsePartial" model="Model.Responses" />
                 </div>
-
             </div>
         </div>
     </div>
