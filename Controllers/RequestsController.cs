@@ -39,6 +39,13 @@ namespace IssueManager.Controllers
                 Filters = filters
             };
 
+            ViewBag.UsersByTeam = _context.Users
+                .GroupBy(u => u.TeamId)
+                .ToDictionary(
+                    g => g.Key.ToString(),
+                    g => g.Select(u => new { id = u.Id, name = u.UserName }).ToList()
+                );
+
             ViewData["TeamSelectOptions"] = new SelectList(_context.Teams, "Id", "Name");
             ViewData["UserSelectOptions"] = new SelectList(_context.Users, "Id", "UserName");
             ViewData["CategorySelectOptions"] = new SelectList(_context.Categories, "Id", "Name");
