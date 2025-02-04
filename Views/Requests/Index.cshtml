@@ -1,5 +1,9 @@
 ﻿@model IssueManager.Models.ViewModels.Requests.RequestsListViewModel
+@using IssueManager.Utilities 
 
+@{
+    ViewData["Title"] = "Index";
+}
 
 <div class="container">
     <div class="app-container">
@@ -7,7 +11,6 @@
             <h2 class="mb-0">Request Management</h2>
             <p class="mb-0 opacity-75">View and manage all requests</p>
         </div>
-
         <p class="d-inline-flex gap-1">
             <button class="app-btn app-btn-main" type="button" data-bs-toggle="collapse" data-bs-target="#requestsFilters" aria-expanded="false" aria-controls="requestsFilters">
                 Show filters
@@ -42,7 +45,7 @@
                     <div class="col-md-3">
                         <div class="form-floating">
                             <select asp-for="Filters.Priority" class="form-select app-form-control"
-                                    asp-items="@Html.GetEnumSelectList(typeof(RequestPriority))">
+                            asp-items="@Html.GetEnumSelectList(typeof(RequestPriority))">
                                 <option value="">-- Select --</option>
                             </select>
                             <label asp-for="Filters.Priority"></label>
@@ -52,7 +55,7 @@
                     <div class="col-md-3">
                         <div class="form-floating">
                             <select asp-for="Filters.Status" class="form-select app-form-control"
-                                    asp-items="@Html.GetEnumSelectList(typeof(RequestStatus))">
+                            asp-items="@Html.GetEnumSelectList(typeof(RequestStatus))">
                                 <option value="">-- Select --</option>
                             </select>
                             <label asp-for="Filters.Status"></label>
@@ -62,7 +65,7 @@
                     <div class="col-md-3">
                         <div class="form-floating">
                             <select asp-for="Filters.CategoryId" class="form-select app-form-control"
-                                    asp-items="ViewBag.CategorySelectOptions">
+                            asp-items="ViewBag.CategorySelectOptions">
                                 <option value="">-- Select --</option>
                             </select>
                             <label asp-for="Filters.CategoryId"></label>
@@ -74,7 +77,7 @@
                     <div class="col-md-3">
                         <div class="form-floating">
                             <select asp-for="Filters.AuthorId" class="form-select app-form-control"
-                                    asp-items="ViewBag.UserSelectOptions">
+                            asp-items="ViewBag.UserSelectOptions">
                                 <option value="">-- Select --</option>
                             </select>
                             <label asp-for="Filters.AuthorId"></label>
@@ -83,8 +86,8 @@
 
                     <div class="col-md-3">
                         <div class="form-floating">
-                            <select asp-for="Filters.AssignedUserId" class="form-select app-form-control"
-                                    asp-items="ViewBag.UserSelectOptions">
+                            <select asp-for="Filters.AssignedUserId" class="form-select app-form-control" id="assignedUserSelect"
+                            asp-items="ViewBag.UserSelectOptions">
                                 <option value="">-- Select --</option>
                             </select>
                             <label asp-for="Filters.AssignedUserId"></label>
@@ -93,8 +96,8 @@
 
                     <div class="col-md-3">
                         <div class="form-floating">
-                            <select asp-for="Filters.AssignedTeamId" class="form-select app-form-control"
-                                    asp-items="ViewBag.TeamSelectOptions">
+                            <select asp-for="Filters.AssignedTeamId" class="form-select app-form-control" id="assignedTeamSelect"
+                            asp-items="ViewBag.TeamSelectOptions">
                                 <option value="">-- Select --</option>
                             </select>
                             <label asp-for="Filters.AssignedTeamId"></label>
@@ -134,9 +137,11 @@
 
                 <div class="my-2">
                     <button type="submit" class="app-btn app-btn-main">Search</button>
-                    <button type="button" onclick="resetFilters()" class="app-btn app-btn-cancel">Reset</button>
+                    <button type="button" class="app-btn app-btn-cancel"
+                        onclick="window.location.href = window.location.pathname">
+                        Reset
+                   </button>
                 </div>
-
             </form>
         </div>
 
@@ -158,17 +163,17 @@
                     @foreach (var item in Model.Requests)
                     {
                         <tr onclick="location.href = '@Url.Action("Details", "Requests", new { id = item.Id })'"
-                            style="cursor: pointer">
-                            <td>@Html.DisplayFor(modelItem => item.Title)</td>
+                        style="cursor: pointer">
+                            <td>@ViewHelpers.Truncate(item.Title)</td>
                             <td>
                                 <span class="app-badge @(item.Status.ToString().ToLower())"
-                                      style="background-color: @GetStatusColor(item.Status)">
+                                style="background-color: @ViewHelpers.GetStatusColor(item.Status)">
                                     @Html.DisplayFor(modelItem => item.Status)
                                 </span>
                             </td>
                             <td>
                                 <span class="app-badge"
-                                      style="background-color: @GetPriorityColor(item.Priority)">
+                                style="background-color: @ViewHelpers.GetPriorityColor(item.Priority)">
                                     @Html.DisplayFor(modelItem => item.Priority)
                                 </span>
                             </td>
@@ -217,34 +222,12 @@
     </div>
 </div>
 
-<script>
-    function resetFilters() {
-        window.location.href = window.location.pathname;
-    }
-</script>
+@section Scripts {
+    @{
+        <script id="usersByTeamData" type="application/json">
+            @Html.Raw(Json.Serialize(ViewBag.UsersByTeam))
+        </script>
 
-@functions {
-    private string GetStatusColor(RequestStatus status)
-    {
-        return status switch
-        {
-            RequestStatus.Open => "#3b82f6",    // Blue
-            RequestStatus.InProgress => "#f59e0b", // Yellow
-            RequestStatus.Resolved => "#10b981",   // Green
-            RequestStatus.Closed => "#6b7280",     // Gray
-            _ => "#6b7280"
-        };
-    }
-
-    private string GetPriorityColor(RequestPriority priority)
-    {
-        return priority switch
-        {
-            RequestPriority.Low => "#10b981",     // Green
-            RequestPriority.Medium => "#f59e0b",   // Yellow
-            RequestPriority.High => "#ef4444",     // Red
-            RequestPriority.Critical => "#7f1d1d",  // Dark Red
-            _ => "#6b7280"
-        };
+        <script src="~/js/filterUsersByGroup.js"></script>
     }
 }
