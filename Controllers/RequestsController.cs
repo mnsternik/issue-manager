@@ -30,7 +30,8 @@ namespace IssueManager.Controllers
         {
             const int pageSize = 10;
 
-            IQueryable<Request> filteredQuery = ApplyFiltersToQuery(_context.Requests, filters);
+            IQueryable<Request> query = _context.Requests.OrderByDescending(r => r.CreateDate); 
+            IQueryable<Request> filteredQuery = ApplyFiltersToQuery(query, filters);
             IQueryable<RequestsListItemViewModel> mappedQuery = _mapper.ProjectTo<RequestsListItemViewModel>(filteredQuery);
 
             var requestsListViewModel = new RequestsListViewModel
@@ -39,17 +40,7 @@ namespace IssueManager.Controllers
                 Filters = filters
             };
 
-            ViewBag.UsersByTeam = _context.Users
-                .GroupBy(u => u.TeamId)
-                .ToDictionary(
-                    g => g.Key.ToString(),
-                    g => g.Select(u => new { id = u.Id, name = u.UserName }).ToList()
-                );
-
-            ViewData["TeamSelectOptions"] = new SelectList(_context.Teams, "Id", "Name");
-            ViewData["UserSelectOptions"] = new SelectList(_context.Users, "Id", "UserName");
-            ViewData["CategorySelectOptions"] = new SelectList(_context.Categories, "Id", "Name");
-
+            PopulateSelectsList();
             return View(requestsListViewModel);
         }
 
@@ -94,17 +85,7 @@ namespace IssueManager.Controllers
         // GET: Requests/Create
         public IActionResult Create()
         {
-            ViewBag.UsersByTeam = _context.Users
-                .GroupBy(u => u.TeamId)
-                .ToDictionary(
-                    g => g.Key.ToString(),
-                    g => g.Select(u => new { id = u.Id, name = u.UserName }).ToList()
-                );
-
-            ViewData["TeamSelectOptions"] = new SelectList(_context.Teams, "Id", "Name");
-            ViewData["UserSelectOptions"] = new SelectList(_context.Users, "Id", "UserName");
-            ViewData["CategorySelectOptions"] = new SelectList(_context.Categories, "Id", "Name");
-
+            PopulateSelectsList(); 
             return View(new CreateRequestViewModel());
         }
 
@@ -117,7 +98,6 @@ namespace IssueManager.Controllers
             if (ModelState.IsValid)
             {
                 var request = _mapper.Map<Request>(viewModel);
-                request.Status = RequestStatus.Open;
                 request.AuthorId = _userManager.GetUserId(User)!;
 
                 _context.Add(request);
@@ -144,7 +124,6 @@ namespace IssueManager.Controllers
             request.AssignedUserId = user!.Id;
             request.AssignedTeam = user.Team;
             request.AssignedTeamId = user.TeamId;
-            request.Status = RequestStatus.InProgress; 
             request.UpdateDate = DateTime.UtcNow;
 
             try
@@ -178,18 +157,8 @@ namespace IssueManager.Controllers
                 return NotFound();
             }
 
-            ViewBag.UsersByTeam = _context.Users
-                .GroupBy(u => u.TeamId)
-                .ToDictionary(
-                    g => g.Key.ToString(),
-                    g => g.Select(u => new { id = u.Id, name = u.UserName }).ToList()
-                );
 
-
-            ViewData["TeamSelectOptions"] = new SelectList(_context.Teams, "Id", "Name", requestViewModel.AssignedTeamId);
-            ViewData["UserSelectOptions"] = new SelectList(_context.Users, "Id", "UserName", requestViewModel.AssignedUserId);
-            ViewData["CategorySelectOptions"] = new SelectList(_context.Categories, "Id", "Name", requestViewModel.CategoryId);
-
+            PopulateSelectsList(requestViewModel.AssignedUserId, requestViewModel.AssignedTeamId, requestViewModel.CategoryId);
             return View(requestViewModel);
         }
 
@@ -227,10 +196,7 @@ namespace IssueManager.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewData["AssignedToTeamId"] = new SelectList(_context.Teams, "Id", "Name", requestViewModel.AssignedTeamId);
-            ViewData["AssignedToUserId"] = new SelectList(_context.Users, "Id", "Id", requestViewModel.AssignedUserId);
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", requestViewModel.CategoryId);
-
+            PopulateSelectsList(requestViewModel.AssignedUserId, requestViewModel.AssignedTeamId, requestViewModel.CategoryId);
             return View(requestViewModel);
         }
 
@@ -296,6 +262,20 @@ namespace IssueManager.Controllers
         private bool RequestExists(int id)
         {
             return _context.Requests.Any(e => e.Id == id);
+        }
+
+        private void PopulateSelectsList(string? selectedUserId = null, int? selectedTeamId = null, int? selectedCategoryId = null)
+        {
+            ViewBag.UsersByTeam = _context.Users
+                .GroupBy(u => u.TeamId)
+                .ToDictionary(
+                    g => g.Key.ToString(),
+                    g => g.Select(u => new { id = u.Id, name = u.UserName }).ToList()
+                );
+
+            ViewData["TeamSelectOptions"] = new SelectList(_context.Teams, "Id", "Name", selectedTeamId);
+            ViewData["UserSelectOptions"] = new SelectList(_context.Users, "Id", "UserName", selectedUserId);
+            ViewData["CategorySelectOptions"] = new SelectList(_context.Categories, "Id", "Name", selectedCategoryId);
         }
 
         private IQueryable<Request> ApplyFiltersToQuery(IQueryable<Request> query, RequestSearchFilters filters)
