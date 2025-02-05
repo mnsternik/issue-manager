@@ -16,7 +16,7 @@ namespace IssueManager.Models
         public string Description { get; set; }
 
         [Required]
-        public RequestStatus Status { get; set; }
+        public RequestStatus Status { get; set; } = RequestStatus.Open; 
 
         [Required]
         public RequestPriority Priority { get; set; }
