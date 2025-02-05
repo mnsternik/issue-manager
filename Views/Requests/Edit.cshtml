@@ -26,6 +26,7 @@
                     <input type="hidden" asp-for="Id" />
                     <input type="hidden" asp-for="AuthorId" />
                     <input type="hidden" asp-for="AuthorName" />
+                    <input type="hidden" asp-for="CreateDate" />
 
                     <div class="row g-4">
                         <div class="col-12">
@@ -84,21 +85,21 @@
 
                         <div class="col-md-6">
                             <div class="form-floating">
-                                <select asp-for="AssignedUserId" class="form-select app-form-control" id="assignedUserSelect"
-                                        asp-items="ViewBag.UserSelectOptions">
-                                    <option value="">-- Select --</option>
-                                </select>
-                                <label asp-for="AssignedUserId"></label>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-floating">
                                 <select asp-for="AssignedTeamId" class="form-select app-form-control" id="assignedTeamSelect"
                                         asp-items="ViewBag.TeamSelectOptions">
                                     <option value="">-- Select --</option>
                                 </select>
                                 <label asp-for="AssignedTeamId"></label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select asp-for="AssignedUserId" class="form-select app-form-control" id="assignedUserSelect"
+                                        asp-items="ViewBag.UserSelectOptions">
+                                    <option value="">-- Select --</option>
+                                </select>
+                                <label asp-for="AssignedUserId"></label>
                             </div>
                         </div>
                     </div>
