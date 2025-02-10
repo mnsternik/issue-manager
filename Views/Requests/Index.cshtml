@@ -198,7 +198,7 @@
                 @if (Model.Requests.HasPreviousPage)
                 {
                     <li class="page-item">
-                        <a class="page-link" asp-route-pageIndex="@(Model.Requests.PageIndex - 1)">Previous</a>
+                        <a class="page-link" asp-all-route-data="@Model.Filters?.ToRouteValues(Model.Requests.PageIndex - 1)">Previous</a>
                     </li>
                 }
                 else
@@ -209,14 +209,14 @@
                 @for (int i = 1; i <= Model.Requests.TotalPages; i++)
                 {
                     <li class="page-item app-page-item @(i == Model.Requests.PageIndex ? "active" : "")">
-                        <a class="page-link" asp-route-pageIndex="@i">@i</a>
+                        <a class="page-link" asp-all-route-data="@Model.Filters?.ToRouteValues(i)">@i</a>
                     </li>
                 }
 
                 @if (Model.Requests.HasNextPage)
                 {
                     <li class="page-item">
-                        <a class="page-link" asp-route-pageIndex="@(Model.Requests.PageIndex + 1)">Next</a>
+                        <a class="page-link" asp-all-route-data="@Model.Filters?.ToRouteValues(Model.Requests.PageIndex + 1)">Next</a>
                     </li>
                 }
                 else
