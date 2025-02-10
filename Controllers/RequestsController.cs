@@ -30,6 +30,14 @@ namespace IssueManager.Controllers
         {
             const int pageSize = 10;
 
+            var routeValues = filters.ToRouteValues(pageIndex);
+
+            // If the incoming request URL contains unnecessary parameters, redirect to the clean version
+            if (Request.Query.Count != routeValues.Count)
+            {
+                return RedirectToAction("Index", routeValues);
+            }
+
             IQueryable<Request> query = _context.Requests.OrderByDescending(r => r.CreateDate); 
             IQueryable<Request> filteredQuery = ApplyFiltersToQuery(query, filters);
             IQueryable<RequestsListItemViewModel> mappedQuery = _mapper.ProjectTo<RequestsListItemViewModel>(filteredQuery);
