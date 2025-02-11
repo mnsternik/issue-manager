@@ -1,5 +1,6 @@
 ﻿using IssueManager.Utilities;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 
 namespace IssueManager.Models.ViewModels.Requests
 {
@@ -13,7 +14,7 @@ namespace IssueManager.Models.ViewModels.Requests
     public class RequestSearchFilters
     {
         [Display(Name = "Request ID")]
-        public string? Id { get; set; }
+        public int? RequestId { get; set; }
 
         [Display(Name = "Title includes")]
         public string? Title { get; set; }
