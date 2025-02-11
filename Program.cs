@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using IssueManager.Mapping;
 using IssueManager.Utilities;
+using System.Globalization;
 
 namespace IssueManager
 {
@@ -31,7 +32,11 @@ namespace IssueManager
             builder.Services.AddControllersWithViews();
 
             builder.Services.AddAutoMapper(typeof(MappingProfile));
-            builder.Services.AddTransient<DataSeeder>(); 
+            builder.Services.AddTransient<DataSeeder>();
+
+            var cultureInfo = new CultureInfo("en-GB"); 
+            CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+            CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
             var app = builder.Build();
 
