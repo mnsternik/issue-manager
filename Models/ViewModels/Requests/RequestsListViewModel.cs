@@ -1,6 +1,5 @@
 ﻿using IssueManager.Utilities;
 using System.ComponentModel.DataAnnotations;
-using System.Globalization;
 
 namespace IssueManager.Models.ViewModels.Requests
 {
