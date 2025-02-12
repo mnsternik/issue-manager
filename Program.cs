@@ -27,7 +27,12 @@ namespace IssueManager
                 options.SignIn.RequireConfirmedAccount = false; 
             })
                 .AddRoles<IdentityRole>() 
-                .AddEntityFrameworkStores<ApplicationDbContext>(); 
+                .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            builder.Services.Configure<IdentityOptions>(options =>
+            {
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ";
+            });
 
             builder.Services.AddControllersWithViews();
 
