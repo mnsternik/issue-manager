@@ -1,0 +1,16 @@
+﻿@model IEnumerable<IssueManager.Models.Attachment>
+
+@if (Model.Any())
+{
+    <label class="details-label py-1">Attachments</label>
+    <ul>
+        @foreach (var file in Model)
+        {
+            <li>
+                <a href="@Url.Action("DownloadFile", "Requests", new { id = file.Id })">
+                    @file.FileName
+                </a>
+            </li>
+        }
+    </ul>
+}
