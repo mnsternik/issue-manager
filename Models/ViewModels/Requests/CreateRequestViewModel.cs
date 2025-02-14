@@ -17,8 +17,6 @@ namespace IssueManager.Models.ViewModels.Requests
 
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
-        public ICollection<Attachment>? Attachments { get; set; }
-
         [Required]
         [Display(Name = "Category")]
         public int CategoryId { get; set; }
@@ -28,5 +26,7 @@ namespace IssueManager.Models.ViewModels.Requests
 
         [Display(Name = "Target team")]
         public int? AssignedTeamId { get; set; }
+
+        public List<IFormFile> Files { get; set; } = [];
     }
 }
