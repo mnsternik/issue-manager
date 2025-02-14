@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using IssueManager.Mapping;
 using IssueManager.Utilities;
 using System.Globalization;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace IssueManager
 {
@@ -32,6 +33,11 @@ namespace IssueManager
             builder.Services.Configure<IdentityOptions>(options =>
             {
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ";
+            });
+
+            builder.Services.Configure<FormOptions>(options =>
+            {
+                options.MultipartBodyLengthLimit = 2 * 1024 * 1024;
             });
 
             builder.Services.AddControllersWithViews();
