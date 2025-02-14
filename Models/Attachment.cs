@@ -4,15 +4,20 @@ namespace IssueManager.Models
 {
     public class Attachment
     {
-        [Key]
         public int Id { get; set; } 
 
         [Required]
-        [MaxLength(200)]
-        public string FilePath { get; set; } 
+        public string FileName { get; set; }
+
+        [Required]
+        public string ContentType { get; set; }
+
+        [Required]
+        public byte[] FileData { get; set; }
 
         [Required]
         public int RequestId { get; set; } 
-        public Request Request { get; set; }
+
+        public Request Request { get; set; } 
     }
 }
