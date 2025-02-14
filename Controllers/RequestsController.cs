@@ -17,6 +17,8 @@ namespace IssueManager.Controllers
         private readonly UserManager<User> _userManager;
         private readonly IMapper _mapper;
 
+        const int pageSize = 10;
+
         public RequestsController(ApplicationDbContext context, UserManager<User> userManager, IMapper mapper)
         {
             _context = context;
@@ -38,7 +40,7 @@ namespace IssueManager.Controllers
                 return RedirectToAction("Index", routeValues);
             }
 
-            IQueryable<Request> query = _context.Requests.OrderByDescending(r => r.CreateDate); 
+            IQueryable<Request> query = _context.Requests.AsNoTracking().OrderByDescending(r => r.CreateDate);
             IQueryable<Request> filteredQuery = ApplyFiltersToQuery(query, filters);
             IQueryable<RequestsListItemViewModel> mappedQuery = _mapper.ProjectTo<RequestsListItemViewModel>(filteredQuery);
 
@@ -75,16 +77,19 @@ namespace IssueManager.Controllers
                 var userRoles = await _userManager.GetRolesAsync(user);
 
                 var currentUserTeamId = await _context.Users
+                    .AsNoTracking()
                     .Where(u => u.Id == user.Id)
                     .Select(u => u.Team!.Id)
                     .FirstOrDefaultAsync();
 
-                // Allow assign if request is not assigned to user yet, but is assigned to the team of current user, or current user is admin (and he is not yet assigned to task)
-                requestViewModel.AllowAssign =
-                    (currentUserTeamId == requestViewModel.AssignedTeamId && requestViewModel.AssignedTeamId == null)
-                    || (userRoles.Contains("Admin") && requestViewModel.AssignedUserId != user.Id);
+                bool isReqNotAssignedToAnyTeam = requestViewModel.AssignedTeamId == null; 
+                bool isUserMemberOfAssignedTeam = requestViewModel.AssignedTeamId == currentUserTeamId;
+                bool isCurrentUserAlreadyAssigned = requestViewModel.AssignedUserId == user.Id;
 
-                requestViewModel.AllowEdit = user.UserName == requestViewModel.AssignedUserName;
+                requestViewModel.AllowAssign = (isUserMemberOfAssignedTeam && !isCurrentUserAlreadyAssigned) 
+                    || (isReqNotAssignedToAnyTeam) 
+                    || (userRoles.Contains("Admin") && !isCurrentUserAlreadyAssigned);
+                requestViewModel.AllowEdit = isCurrentUserAlreadyAssigned;
             }
 
             return View(requestViewModel);
@@ -108,12 +113,49 @@ namespace IssueManager.Controllers
                 var request = _mapper.Map<Request>(viewModel);
                 request.AuthorId = _userManager.GetUserId(User)!;
 
+                if (viewModel.Files != null && viewModel.Files.Any())
+                {
+                    foreach (var file in viewModel.Files)
+                    {
+                        if (file.Length > 0 && file.Length < (2 * 1024 * 1024))
+                        {
+                            var allowedExtensions = new[] { ".jpg", ".png", ".pdf", ".docx", "doc", ".txt" };
+                            var fileExtension = Path.GetExtension(file.FileName).ToLower();
+
+                            if (!allowedExtensions.Contains(fileExtension))
+                            {
+                                ModelState.AddModelError("Files", "Invalid file type.");
+                                return View(viewModel);
+                            }
+
+                            using (var memoryStream = new MemoryStream())
+                            {
+                                await file.CopyToAsync(memoryStream);
+                                request.Attachments.Add(new Attachment
+                                {
+                                    FileName = file.FileName,
+                                    ContentType = file.ContentType,
+                                    FileData = memoryStream.ToArray()
+                                });
+                            }
+                        }
+                    }
+                }
+
                 _context.Add(request);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
 
             return View(viewModel);
+        }
+
+        public async Task<IActionResult> DownloadFile(int id)
+        {
+            var file = await _context.Attachments.FindAsync(id);
+            if (file == null) return NotFound();
+
+            return File(file.FileData, file.ContentType, file.FileName);
         }
 
         [HttpPost]
@@ -288,9 +330,9 @@ namespace IssueManager.Controllers
 
         private IQueryable<Request> ApplyFiltersToQuery(IQueryable<Request> query, RequestSearchFilters filters)
         {
-            if (!string.IsNullOrWhiteSpace(filters.Id))
+            if (filters.RequestId.HasValue)
             {
-                query = query.Where(r => r.Id.ToString().Contains(filters.Id));
+                query = query.Where(r => r.Id == filters.RequestId);
             }
             if (!string.IsNullOrWhiteSpace(filters.Title))
             {
