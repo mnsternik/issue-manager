@@ -1,0 +1,62 @@
+﻿.app-file-upload {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 50px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    background-color: #fff;
+    cursor: pointer;
+    transition: border-color 0.3s ease-in-out, background-color 0.3s ease-in-out;
+}
+
+.app-file-input {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.app-file-label {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #555;
+    font-weight: 500;
+    text-align: center;
+}
+
+.app-file-upload:hover {
+    background-color: #f8f9fa;
+}
+
+.app-file-list {
+    margin-top: 10px;
+    padding: 0;
+    list-style: none;
+    font-size: 14px;
+}
+
+    .app-file-list li {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px;
+        border-radius: 6px;
+        background: #f4f4f4;
+        margin-bottom: 5px;
+    }
+
+    .app-file-list button {
+        background: none;
+        border: none;
+        color: #ff3b3b;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 14px;
+    }
