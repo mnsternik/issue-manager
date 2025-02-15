@@ -43,7 +43,7 @@ namespace IssueManager.Models
         public User Author { get; set; }
         public User? AssignedUser { get; set; }
         public ICollection<RequestResponse>? Responses { get; set; }
-        public ICollection<Attachment>? Attachments { get; set; }
+        public ICollection<Attachment>? Attachments { get; set; } = [];
     }
 
     public enum RequestStatus
