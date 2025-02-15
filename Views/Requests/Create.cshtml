@@ -12,7 +12,7 @@
                     <p class="mb-0 opacity-75">Fill in the details below to submit a new request</p>
                 </div>
 
-                <form asp-action="Create">
+                <form asp-action="Create" enctype="multipart/form-data">
                     <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3" role="alert"></div>
 
                     <div class="row g-4">
@@ -50,6 +50,7 @@
                                     <option value="">-- Select --</option>
                                 </select>
                                 <label asp-for="CategoryId"></label>
+                                <span asp-validation-for="CategoryId" class="validation-message"></span>
                             </div>
                         </div>
 
@@ -71,6 +72,21 @@
                                 </select>
                                 <label asp-for="AssignedTeamId"></label>
                             </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="files" class="details-label form-label">Attachments</label>
+
+                            <div class="app-file-upload">
+                                <input type="file" id="files" name="Files" multiple class="app-file-input" />
+                                <label for="files" class="app-file-label">
+                                    <span id="file-label-text">Click to upload files</span>
+                                </label>
+                            </div>
+
+                            <ul id="file-list" class="app-file-list"></ul>
+
+                            <span asp-validation-for="Files" class="validation-message text-danger"></span>
                         </div>
 
                         <div class="col-12 mt-4">
@@ -101,5 +117,6 @@
         </script>
 
         <script src="~/js/filterUsersByGroup.js"></script>
+        <script src="~/js/fileUpload.js"></script>
     }
 }
