@@ -16,10 +16,6 @@
         background: rgba(255, 255, 255, 0.1);
     }
 
-.nav-item a, .nav-item button {
-    color: var(--navbar-font-color) !important;
-}
-
 .nav-item.dropdown {
     flex-direction: column;
     align-items: baseline;
@@ -30,7 +26,7 @@
     width: 100%;
 }
 
-.nav-link {
+.navbar-link {
     color: var(--navbar-font-color) !important;
     font-weight: 500;
     padding: 0.5rem 1rem !important;
@@ -47,12 +43,12 @@ button.nav-link {
     text-align: left; 
 }
 
-    .nav-link:hover {
+    .navbar-link:hover {
         background: rgba(255, 255, 255, 0.1);
         color: white !important;
     }
 
-    .nav-link.active {
+    .navbar-link.active {
         background: rgba(255, 255, 255, 0.2);
         color: white !important;
     }
@@ -76,3 +72,13 @@ button.nav-link {
 .nav-icon {
     margin-right: 0.5rem;
 }
+
+
+.dark-nav-link {
+    color: var(--app-main-color) !important;
+}
+
+    .dark-nav-link.active {
+        color: white !important;
+        background: var(--app-main-color) !important;
+    }

@@ -4,7 +4,7 @@
 
 .app-form-control {
     border: 2px solid #e5e7eb;
-    border-radius: 10px;
+    border-radius: 10px; 
     padding: 0.75rem 1rem;
     transition: all 0.3s ease;
 }
