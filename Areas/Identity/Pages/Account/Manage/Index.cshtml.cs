@@ -31,7 +31,7 @@ namespace IssueManager.Areas.Identity.Pages.Account.Manage
         private async Task LoadAsync(User user)
         {
 
-            FullName = user.UserName;
+            FullName = user.Name;
             Email = await _userManager.GetEmailAsync(user);
 
 
