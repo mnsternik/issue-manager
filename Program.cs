@@ -25,15 +25,11 @@ namespace IssueManager
 
             builder.Services.AddDefaultIdentity<User>(options =>
             {
-                options.SignIn.RequireConfirmedAccount = false; 
+                options.SignIn.RequireConfirmedAccount = false;
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
             })
                 .AddRoles<IdentityRole>() 
                 .AddEntityFrameworkStores<ApplicationDbContext>();
-
-            builder.Services.Configure<IdentityOptions>(options =>
-            {
-                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ";
-            });
 
             builder.Services.Configure<FormOptions>(options =>
             {
