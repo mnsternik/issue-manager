@@ -24,7 +24,7 @@ namespace IssueManager.Models
         [Required]
         public DateTime CreateDate { get; set; } = DateTime.UtcNow;
 
-        public DateTime? UpdateDate { get; set; } = DateTime.UtcNow;
+        public DateTime? UpdateDate { get; set; } 
 
         [Required]
         public int CategoryId { get; set; }
@@ -38,11 +38,15 @@ namespace IssueManager.Models
 
         public int? AssignedTeamId { get; set; }
         public Team? AssignedTeam { get; set; }
-
-        public Category Category { get; set; }
-        public User Author { get; set; }
         public User? AssignedUser { get; set; }
-        public ICollection<RequestResponse>? Responses { get; set; }
+
+        [Required]
+        public Category Category { get; set; }
+
+        [Required]
+        public User Author { get; set; }
+
+        public ICollection<RequestResponse>? Responses { get; set; } = [];
         public ICollection<Attachment>? Attachments { get; set; } = [];
     }
 

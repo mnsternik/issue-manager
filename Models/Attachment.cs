@@ -16,8 +16,9 @@ namespace IssueManager.Models
         public byte[] FileData { get; set; }
 
         [Required]
-        public int RequestId { get; set; } 
+        public int RequestId { get; set; }
 
+        [Required]
         public Request Request { get; set; } 
     }
 }

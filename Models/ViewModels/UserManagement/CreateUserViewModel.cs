@@ -10,7 +10,7 @@ namespace IssueManager.Models.ViewModels.UserManagement
         [Required]
         [MaxLength(50)]
         [DisplayName("Full name")]
-        public string UserName { get; set; }
+        public string Name { get; set; }
 
         [Required]
         [EmailAddress]
