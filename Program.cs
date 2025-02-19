@@ -6,6 +6,8 @@ using IssueManager.Mapping;
 using IssueManager.Utilities;
 using System.Globalization;
 using Microsoft.AspNetCore.Http.Features;
+using IssueManager.Services.Requests;
+using IssueManager.Services.Files;
 
 namespace IssueManager
 {
@@ -40,6 +42,8 @@ namespace IssueManager
 
             builder.Services.AddAutoMapper(typeof(MappingProfile));
             builder.Services.AddTransient<DataSeeder>();
+            builder.Services.AddTransient<IRequestService, RequestService>();
+            builder.Services.AddTransient<IFileService, FileService>();
 
             var cultureInfo = new CultureInfo("en-GB"); 
             CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
