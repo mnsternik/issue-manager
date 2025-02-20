@@ -1,12 +1,20 @@
-﻿using IssueManager.Exceptions;
+﻿using IssueManager.Data;
+using IssueManager.Exceptions;
 using IssueManager.Models;
 
 namespace IssueManager.Services.Files
 {
     public class FileService : IFileService
     {
+        private readonly ApplicationDbContext _context; 
+
         private readonly string[] _allowedExtensions = { ".jpg", ".png", ".pdf", ".docx", ".doc", ".txt" };
         private const int _maxFileSize = 2 * 1024 * 1024; // 2MB
+
+        public FileService(ApplicationDbContext context)
+        {
+            _context = context; 
+        }
 
         public async Task<List<Attachment>> ProcessFilesAsync(IEnumerable<IFormFile> files)
         {
@@ -37,6 +45,11 @@ namespace IssueManager.Services.Files
             }
 
             return attachments;
+        }
+
+        public async Task<Attachment?> GetAttachmentAsync(int? id)
+        {
+            return await _context.Attachments.FindAsync(id); 
         }
     }
 }
