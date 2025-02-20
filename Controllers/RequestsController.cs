@@ -8,6 +8,10 @@ using Microsoft.AspNetCore.Authorization;
 using IssueManager.Utilities;
 using AutoMapper;
 using IssueManager.Models.ViewModels.Requests;
+using IssueManager.Services.Requests;
+using IssueManager.Exceptions;
+using IssueManager.Services.Files;
+using System.Data;
 
 namespace IssueManager.Controllers
 {
@@ -16,45 +20,40 @@ namespace IssueManager.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<User> _userManager;
         private readonly IMapper _mapper;
+        private readonly IRequestService _requestsService;
+        private readonly IFileService _fileService; 
 
         const int pageSize = 10;
 
-        public RequestsController(ApplicationDbContext context, UserManager<User> userManager, IMapper mapper)
+        public RequestsController(ApplicationDbContext context, UserManager<User> userManager, IMapper mapper, IRequestService requestsService, IFileService fileService)
         {
             _context = context;
             _userManager = userManager;
             _mapper = mapper;
+            _requestsService = requestsService;
+            _fileService = fileService;
         }
 
         // GET: Requests
         [HttpGet]
         public async Task<IActionResult> Index(RequestSearchFilters filters, int pageIndex = 1)
         {
-            const int pageSize = 10;
-
             var routeValues = filters.ToRouteValues(pageIndex);
 
-            // If the incoming request URL contains unnecessary parameters, redirect to the clean version
+            // Handle URL parameters cleanup
             if (Request.Query.Count != routeValues.Count)
             {
                 return RedirectToAction("Index", routeValues);
             }
 
-            IQueryable<Request> query = _context.Requests.AsNoTracking().OrderByDescending(r => r.CreateDate);
-            IQueryable<Request> filteredQuery = ApplyFiltersToQuery(query, filters);
-            IQueryable<RequestsListItemViewModel> mappedQuery = _mapper.ProjectTo<RequestsListItemViewModel>(filteredQuery);
-
-            var requestsListViewModel = new RequestsListViewModel
-            {
-                Requests = await PaginatedList<RequestsListItemViewModel>.CreateAsync(mappedQuery, pageIndex, pageSize),
-                Filters = filters
-            };
+            var requestsListViewModel = await _requestsService.GetRequestsAsync(filters, pageIndex);
 
             PopulateSelectsList();
             return View(requestsListViewModel);
         }
 
         // GET: Requests/Details/5
+        [HttpGet]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -62,97 +61,55 @@ namespace IssueManager.Controllers
                 return NotFound();
             }
 
-            var requestViewModel = await _mapper
-                .ProjectTo<DetailsRequestViewModel>(_context.Requests.AsNoTracking())
-                .FirstOrDefaultAsync(r => r.Id == id);
+            var requestViewModel = await _requestsService.GetRequestDetailsAsync((int)id, User); 
 
             if (requestViewModel == null)
             {
                 return NotFound();
             }
 
-            var user = await _userManager.GetUserAsync(User);
-            if (user != null)
-            {
-                var userRoles = await _userManager.GetRolesAsync(user);
-
-                var currentUserTeamId = await _context.Users
-                    .AsNoTracking()
-                    .Where(u => u.Id == user.Id)
-                    .Select(u => u.Team!.Id)
-                    .FirstOrDefaultAsync();
-
-                bool isReqNotAssignedToAnyTeam = requestViewModel.AssignedTeamId == null; 
-                bool isUserMemberOfAssignedTeam = requestViewModel.AssignedTeamId == currentUserTeamId;
-                bool isCurrentUserAlreadyAssigned = requestViewModel.AssignedUserId == user.Id;
-
-                requestViewModel.AllowAssign = (isUserMemberOfAssignedTeam && !isCurrentUserAlreadyAssigned) 
-                    || (isReqNotAssignedToAnyTeam) 
-                    || (userRoles.Contains("Admin") && !isCurrentUserAlreadyAssigned);
-                requestViewModel.AllowEdit = isCurrentUserAlreadyAssigned;
-            }
-
             return View(requestViewModel);
         }
 
         // GET: Requests/Create
+        [Authorize(Roles = "User,Admin")]
         public IActionResult Create()
         {
-            PopulateSelectsList(); 
+            PopulateSelectsList();
             return View(new CreateRequestViewModel());
         }
 
         // POST: Requests/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize]
-        public async Task<IActionResult> Create(CreateRequestViewModel viewModel)
+        [Authorize(Roles = "User,Admin")]
+        public async Task<IActionResult> Create(CreateRequestViewModel requestViewModel)
         {
             if (ModelState.IsValid)
-            {
-                var request = _mapper.Map<Request>(viewModel);
-                request.AuthorId = _userManager.GetUserId(User)!;
+            {           
+                var currentUserId = _userManager.GetUserId(User)!;
 
-                if (viewModel.Files != null && viewModel.Files.Any())
+                try
                 {
-                    foreach (var file in viewModel.Files)
-                    {
-                        if (file.Length > 0 && file.Length < (2 * 1024 * 1024))
-                        {
-                            var allowedExtensions = new[] { ".jpg", ".png", ".pdf", ".docx", "doc", ".txt" };
-                            var fileExtension = Path.GetExtension(file.FileName).ToLower();
-
-                            if (!allowedExtensions.Contains(fileExtension))
-                            {
-                                ModelState.AddModelError("Files", "Invalid file type.");
-                                return View(viewModel);
-                            }
-
-                            using (var memoryStream = new MemoryStream())
-                            {
-                                await file.CopyToAsync(memoryStream);
-                                request.Attachments.Add(new Attachment
-                                {
-                                    FileName = file.FileName,
-                                    ContentType = file.ContentType,
-                                    FileData = memoryStream.ToArray()
-                                });
-                            }
-                        }
-                    }
+                    await _requestsService.CreateRequestAsync(requestViewModel, currentUserId);
                 }
-
-                _context.Add(request);
-                await _context.SaveChangesAsync();
+                catch (InvalidFileTypeException ex)
+                {
+                    ModelState.AddModelError("", ex.Message);
+                    PopulateSelectsList();
+                    return View(requestViewModel);
+                }
+             
                 return RedirectToAction(nameof(Index));
             }
 
-            return View(viewModel);
+            PopulateSelectsList();
+            return View(requestViewModel);
         }
 
         public async Task<IActionResult> DownloadFile(int id)
         {
-            var file = await _context.Attachments.FindAsync(id);
+            var file = await _fileService.GetAttachmentAsync(id); 
             if (file == null) return NotFound();
 
             return File(file.FileData, file.ContentType, file.FileName);
@@ -160,37 +117,24 @@ namespace IssueManager.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> Assign(int id)
         {
-            var user = await _userManager.GetUserAsync(User);
-            var request = await _context.Requests.FindAsync(id);
-
-            if (request == null)
-            {
-                return NotFound();
-            };
-
-            request.AssignedUser = user;
-            request.AssignedUserId = user!.Id;
-            request.AssignedTeam = user.Team;
-            request.AssignedTeamId = user.TeamId;
-            request.UpdateDate = DateTime.UtcNow;
-
             try
             {
-                _context.Update(request);
-                await _context.SaveChangesAsync();
-
+                await _requestsService.AssignRequestAsync(id, User); 
             }
-            catch (DbUpdateConcurrencyException)
+            catch (InvalidOperationException)
             {
-                throw;
+                return NotFound(); 
             }
+            //Add DbUpdateConcurrencyException handling
 
             return RedirectToAction(nameof(Details), new { Id = id });
         }
 
         // GET: Requests/Edit/5
+        [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -214,6 +158,7 @@ namespace IssueManager.Controllers
 
         // POST: Requests/Edit/5
         [HttpPost]
+        [Authorize(Roles = "User,Admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,Status,Priority,CreateDate,UpdateDate,AuthorName,AuthorId,CategoryId,AssignedUserId,AssignedTeamId")] EditRequestViewModel requestViewModel)
         {
@@ -251,6 +196,7 @@ namespace IssueManager.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "User,Admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddResponse(int requestId, string responseText)
         {
@@ -274,6 +220,7 @@ namespace IssueManager.Controllers
         }
 
         // GET: Requests/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -296,6 +243,7 @@ namespace IssueManager.Controllers
 
         // POST: Requests/Delete/5
         [HttpPost, ActionName("Delete")]
+        [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
@@ -320,66 +268,12 @@ namespace IssueManager.Controllers
                 .GroupBy(u => u.TeamId)
                 .ToDictionary(
                     g => g.Key.ToString(),
-                    g => g.Select(u => new { id = u.Id, name = u.UserName }).ToList()
+                    g => g.Select(u => new { id = u.Id, name = u.Name }).ToList()
                 );
 
             ViewData["TeamSelectOptions"] = new SelectList(_context.Teams, "Id", "Name", selectedTeamId);
-            ViewData["UserSelectOptions"] = new SelectList(_context.Users, "Id", "UserName", selectedUserId);
+            ViewData["UserSelectOptions"] = new SelectList(_context.Users, "Id", "Name", selectedUserId);
             ViewData["CategorySelectOptions"] = new SelectList(_context.Categories, "Id", "Name", selectedCategoryId);
-        }
-
-        private IQueryable<Request> ApplyFiltersToQuery(IQueryable<Request> query, RequestSearchFilters filters)
-        {
-            if (filters.RequestId.HasValue)
-            {
-                query = query.Where(r => r.Id == filters.RequestId);
-            }
-            if (!string.IsNullOrWhiteSpace(filters.Title))
-            {
-                query = query.Where(r => r.Title.Contains(filters.Title));
-            }
-            if (filters.Priority.HasValue)
-            {
-                query = query.Where(r => r.Priority == filters.Priority);
-            }
-            if (filters.Status.HasValue)
-            {
-                query = query.Where(r => r.Status == filters.Status);
-            }
-            if (filters.CategoryId.HasValue)
-            {
-                query = query.Where(r => r.CategoryId == filters.CategoryId);
-            }
-            if (!string.IsNullOrWhiteSpace(filters.AssignedUserId))
-            {
-                query = query.Where(r => r.AssignedUserId == filters.AssignedUserId);
-            }
-            if (!string.IsNullOrWhiteSpace(filters.AuthorId))
-            {
-                query = query.Where(r => r.AuthorId == filters.AuthorId);
-            }
-            if (filters.AssignedTeamId.HasValue)
-            {
-                query = query.Where(r => r.AssignedTeamId == filters.AssignedTeamId);
-            }
-            if (filters.CreatedBefore.HasValue)
-            {
-                query = query.Where(r => r.CreateDate <= filters.CreatedBefore);
-            }
-            if (filters.CreatedAfter.HasValue)
-            {
-                query = query.Where(r => r.CreateDate >= filters.CreatedAfter);
-            }
-            if (filters.UpdatedBefore.HasValue)
-            {
-                query = query.Where(r => r.UpdateDate <= filters.UpdatedBefore);
-            }
-            if (filters.UpdatedAfter.HasValue)
-            {
-                query = query.Where(r => r.UpdateDate >= filters.UpdatedAfter);
-            }
-
-            return query;
         }
     }
 }
