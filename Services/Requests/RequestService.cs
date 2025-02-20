@@ -70,9 +70,11 @@ namespace IssueManager.Services.Requests
                 bool isUserMemberOfAssignedTeam = requestViewModel.AssignedTeamId == currentUserTeamId;
                 bool isCurrentUserAlreadyAssigned = requestViewModel.AssignedUserId == user.Id;
 
-                requestViewModel.AllowAssign = (isUserMemberOfAssignedTeam && !isCurrentUserAlreadyAssigned)
-                    || (isReqNotAssignedToAnyTeam)
-                    || (userRoles.Contains("Admin") && !isCurrentUserAlreadyAssigned);
+                requestViewModel.AllowAssign =
+                    (isUserMemberOfAssignedTeam && !isCurrentUserAlreadyAssigned)
+                    || (userRoles.Contains("Admin") && !isCurrentUserAlreadyAssigned)
+                    || (isReqNotAssignedToAnyTeam);
+
                 requestViewModel.AllowEdit = isCurrentUserAlreadyAssigned;
             }
 
@@ -87,6 +89,26 @@ namespace IssueManager.Services.Requests
             request.Attachments = await _fileService.ProcessFilesAsync(requestViewModel.Files);
 
             _context.Add(request);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AssignRequestAsync(int id, ClaimsPrincipal currentUser) 
+        {
+            var request = await _context.Requests.FindAsync(id);
+            var user = await _userManager.GetUserAsync(currentUser);
+
+            if (request == null)
+            {
+                throw new InvalidOperationException("Request not found");
+            };
+
+            request.AssignedUser = user;
+            request.AssignedUserId = user!.Id;
+            request.AssignedTeam = user.Team;
+            request.AssignedTeamId = user.TeamId;
+            request.UpdateDate = DateTime.UtcNow;
+
+            _context.Update(request);
             await _context.SaveChangesAsync();
         }
 

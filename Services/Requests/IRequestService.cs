@@ -8,5 +8,6 @@ namespace IssueManager.Services.Requests
         public Task<RequestsListViewModel> GetRequestsAsync(RequestSearchFilters filters, int pageIndex);
         public Task<DetailsRequestViewModel?> GetRequestDetailsAsync(int id, ClaimsPrincipal currentUser);
         public Task CreateRequestAsync(CreateRequestViewModel requestViewModel, string currentUserId);
+        public Task AssignRequestAsync(int id, ClaimsPrincipal currentUser); 
     }
 }
