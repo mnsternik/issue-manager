@@ -11,7 +11,7 @@
         const selectedUserId = this.value;
 
         for (const [teamId, users] of Object.entries(usersByTeam)) {
-            if (users.some(user => user.id == selectedUserId)) {
+            if (users.some(user => user.Id == selectedUserId)) {
                 assignedTeamSelect.value = teamId; 
                 break; 
             }
@@ -22,17 +22,15 @@
     assignedTeamSelect.addEventListener("change", function() {
         const selectedTeamId = this.value; 
 
-        // if no value is selected, show all users
-        console.log(selectedTeamId == false); 
+        // If no value is selected, show all users 
         if (!selectedTeamId) {
             assignedUserSelect.innerHTML = '<option value="">-- Select --</option>'; // Reset options
 
             for (const team in usersByTeam) {
-                console.log(team);
                 usersByTeam[team].forEach(user => {
                     const option = document.createElement("option");
-                    option.value = user.id;
-                    option.textContent = user.name;
+                    option.value = user.Id;
+                    option.textContent = user.Name;
                     assignedUserSelect.appendChild(option);
                 })
             }
@@ -44,8 +42,8 @@
         if (usersByTeam[selectedTeamId]) {
             usersByTeam[selectedTeamId].forEach(user => {
                 const option = document.createElement("option");
-                option.value = user.id;
-                option.textContent = user.name;
+                option.value = user.Id;
+                option.textContent = user.Name;
                 assignedUserSelect.appendChild(option); 
             })
         }
