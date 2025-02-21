@@ -3,6 +3,7 @@ using IssueManager.Data;
 using IssueManager.Models;
 using IssueManager.Models.ViewModels.Requests;
 using IssueManager.Services.Files;
+using IssueManager.Services.SelectLists;
 using IssueManager.Utilities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -16,15 +17,17 @@ namespace IssueManager.Services.Requests
         private readonly IMapper _mapper;
         private readonly UserManager<User> _userManager;
         private readonly IFileService _fileService;
+        private readonly ISelectListService _selectListService;
 
         private const int _pageSize = 10;
 
-        public RequestService(ApplicationDbContext context, IMapper mapper, UserManager<User> userManager, IFileService fileService)
+        public RequestService(ApplicationDbContext context, IMapper mapper, UserManager<User> userManager, IFileService fileService, ISelectListService selectListService)
         {
             _context = context;
             _mapper = mapper;
             _userManager = userManager;
             _fileService = fileService;
+            _selectListService = selectListService;
         }
 
         public async Task<RequestsListViewModel> GetRequestsAsync(RequestSearchFilters filters, int pageIndex)
@@ -37,11 +40,20 @@ namespace IssueManager.Services.Requests
 
             var requestsListViewModel = new RequestsListViewModel
             {
-                Requests = await PaginatedList<RequestsListItemViewModel>.CreateAsync(mappedQuery, pageIndex, _pageSize),
-                Filters = filters
+                Requests = await PaginatedList<RequestsListItemViewModel>.CreateAsync(mappedQuery, pageIndex),
+                Filters = filters,
+                SelectLists = _selectListService.PopulateRequestSelectLists()
             };
 
             return requestsListViewModel;
+        }
+
+        public CreateRequestViewModel GetCreateRequest()
+        {
+            var viewModel = new CreateRequestViewModel();
+            viewModel.SelectLists = _selectListService.PopulateRequestSelectLists();
+
+            return viewModel; 
         }
 
         public async Task<DetailsRequestViewModel?> GetRequestDetailsAsync(int id, ClaimsPrincipal currentUser)
@@ -81,7 +93,7 @@ namespace IssueManager.Services.Requests
             return requestViewModel;
         }
 
-        public async Task CreateRequestAsync(CreateRequestViewModel requestViewModel, string currentUserId)
+        public async Task<int> CreateRequestAsync(CreateRequestViewModel requestViewModel, string currentUserId)
         {
             var request = _mapper.Map<Request>(requestViewModel);
 
@@ -90,6 +102,8 @@ namespace IssueManager.Services.Requests
 
             _context.Add(request);
             await _context.SaveChangesAsync();
+
+            return request.Id;
         }
 
         public async Task AssignRequestAsync(int id, ClaimsPrincipal currentUser) 
@@ -109,6 +123,53 @@ namespace IssueManager.Services.Requests
             request.UpdateDate = DateTime.UtcNow;
 
             _context.Update(request);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<EditRequestViewModel?> GetEditRequestAsync(int id)
+        {
+            var requestViewModel = await _mapper
+                .ProjectTo<EditRequestViewModel>(_context.Requests.AsNoTracking())
+                .FirstOrDefaultAsync(r => r.Id == id);
+
+            if (requestViewModel == null)
+            {
+                return null;
+            }
+            else
+            {
+                requestViewModel.SelectLists = _selectListService.PopulateRequestSelectLists(requestViewModel.AssignedUserId, requestViewModel.AssignedTeamId, requestViewModel.CategoryId);
+                return requestViewModel;
+            }
+        }
+
+        public async Task EditRequestAsync(EditRequestViewModel requestViewModel)
+        {
+            var request = _mapper.Map<Request>(requestViewModel);
+            request.UpdateDate = DateTime.UtcNow;
+
+            try
+            {
+                _context.Update(request);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                // TODO
+            }
+        }
+
+        public async Task AddResponseAsync(int requestId, string responseText, string currentUserId)
+        {
+            var response = new RequestResponse
+            {
+                RequestId = requestId,
+                ResponseText = responseText,
+                AuthorId = currentUserId,
+                CreateDate = DateTime.UtcNow
+            };
+
+            _context.RequestResponses.Add(response);
             await _context.SaveChangesAsync();
         }
 
