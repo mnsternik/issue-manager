@@ -1,4 +1,5 @@
-﻿using IssueManager.Utilities;
+﻿using IssueManager.Models.ViewModels.Common;
+using IssueManager.Utilities;
 using System.ComponentModel.DataAnnotations;
 
 namespace IssueManager.Models.ViewModels.Requests
@@ -8,6 +9,8 @@ namespace IssueManager.Models.ViewModels.Requests
         public PaginatedList<RequestsListItemViewModel> Requests { get; set; }
 
         public RequestSearchFilters? Filters { get; set; }
+
+        public RequestsSelectListsViewModel SelectLists { get; set; } = new RequestsSelectListsViewModel();
     }
 
     public class RequestSearchFilters

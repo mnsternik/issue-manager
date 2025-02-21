@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using IssueManager.Models.ViewModels.Common;
+using System.ComponentModel.DataAnnotations;
 
 namespace IssueManager.Models.ViewModels.Requests
 {
@@ -42,5 +43,7 @@ namespace IssueManager.Models.ViewModels.Requests
         public ICollection<Attachment>? Attachments { get; set; }
 
         public ICollection<RequestResponseViewModel>? Responses { get; set; }
+
+        public RequestsSelectListsViewModel SelectLists { get; set; } = new RequestsSelectListsViewModel();
     }
 }

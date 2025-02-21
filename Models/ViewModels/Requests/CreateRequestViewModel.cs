@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using IssueManager.Models.ViewModels.Common;
+using IssueManager.Services.SelectLists;
+using System.ComponentModel.DataAnnotations;
 
 namespace IssueManager.Models.ViewModels.Requests
 {
@@ -6,11 +8,11 @@ namespace IssueManager.Models.ViewModels.Requests
     {
         [Required]
         [MaxLength(100)]
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
 
         [Required]
         [MaxLength(1000)]
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
 
         [Required]
         public RequestPriority Priority { get; set; }
@@ -28,5 +30,7 @@ namespace IssueManager.Models.ViewModels.Requests
         public int? AssignedTeamId { get; set; }
 
         public List<IFormFile> Files { get; set; } = [];
+
+        public RequestsSelectListsViewModel SelectLists { get; set; } = new RequestsSelectListsViewModel(); 
     }
 }
