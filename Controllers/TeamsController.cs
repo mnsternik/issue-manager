@@ -1,79 +1,62 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using IssueManager.Data;
 using IssueManager.Models;
-using IssueManager.Utilities;
 using IssueManager.Models.ViewModels.Teams;
-using AutoMapper;
+using IssueManager.Services.Teams;
+using IssueManager.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 
 namespace IssueManager.Controllers
 {
     public class TeamsController : Controller
     {
-        private readonly ApplicationDbContext _context;
-        private readonly IMapper _mapper; 
+        private readonly ITeamService _teamService;
 
-        public TeamsController(ApplicationDbContext context, IMapper mapper)
+        public TeamsController(ITeamService teamService)
         {
-            _context = context;
-            _mapper = mapper;
+            _teamService = teamService;
         }
 
         // GET: Teams
         public async Task<IActionResult> Index(string search, int pageIndex = 1)
         {
-            const int pageSize = 10;
-
-            IQueryable<Team> query = _context.Teams;
-
-            if (!string.IsNullOrEmpty(search))
-            {
-                query = query.Where(t => t.Name.ToLower().Contains(search));
-            }
-
-            IQueryable<TeamsListItemViewModel> mappedQuery = _mapper.ProjectTo<TeamsListItemViewModel>(query);
-
-            var paginatedTeams = await PaginatedList<TeamsListItemViewModel>.CreateAsync(mappedQuery, pageIndex, pageSize);
-
-            var teamsViewModel = new TeamsListViewModel
-            {
-                Teams = paginatedTeams,
-                SearchString = search
-            };
-
+            var teamsViewModel = await _teamService.GetTeamsAsync(search, pageIndex);
             return View(teamsViewModel);
         }
 
         // GET: Teams/Create
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             return View();
         }
 
-
         // POST: Teams/Create
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name")] CreateTeamViewModel teamViewModel)
+        public async Task<IActionResult> Create(CreateTeamViewModel teamViewModel)
         {
             if (ModelState.IsValid)
             {
-                if (TeamNameExists(teamViewModel.Name))
+                try
+                {
+                    await _teamService.CreateTeamAsync(teamViewModel);
+                } 
+                catch (NameAlreadyExistsException) 
                 {
                     ModelState.AddModelError("Name", "Team with this name already exists");
                     return View(teamViewModel);
                 }
 
-                var team = _mapper.Map<Team>(teamViewModel); 
-
-                _context.Add(team);
-                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
             return View(teamViewModel);
         }
 
         // GET: Teams/Edit/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -81,18 +64,21 @@ namespace IssueManager.Controllers
                 return NotFound();
             }
 
-            var team = await _context.Teams.FindAsync(id);
+            var team = await _teamService.GetTeamAsync((int)id);
+
             if (team == null)
             {
                 return NotFound();
             }
+
             return View(team);
         }
 
         // POST: Teams/Edit/5
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name")] Team team)
+        public async Task<IActionResult> Edit(int id, Team team)
         {
             if (id != team.Id)
             {
@@ -101,34 +87,28 @@ namespace IssueManager.Controllers
 
             if (ModelState.IsValid)
             {
-                if (TeamNameExists(team.Name))
+                try
+                {
+                    await _teamService.EditTeamAsync(team);
+                }
+                catch (NameAlreadyExistsException)
                 {
                     ModelState.AddModelError("Name", "Team with this name already exists");
                     return View(team);
                 }
-
-                try
-                {
-                    _context.Update(team);
-                    await _context.SaveChangesAsync();
-                }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!TeamIdExists(team.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    // TODO 
                 }
+
                 return RedirectToAction(nameof(Index));
             }
+
             return View(team);
         }
 
         // GET: Teams/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -136,8 +116,8 @@ namespace IssueManager.Controllers
                 return NotFound();
             }
 
-            var team = await _context.Teams
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var team = await _teamService.GetTeamAsync((int)id);
+
             if (team == null)
             {
                 return NotFound();
@@ -148,27 +128,20 @@ namespace IssueManager.Controllers
 
         // POST: Teams/Delete/5
         [HttpPost, ActionName("Delete")]
+        [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var team = await _context.Teams.FindAsync(id);
-            if (team != null)
+            try
             {
-                _context.Teams.Remove(team);
+                await _teamService.DeleteTeamAsync(id); 
+            }
+            catch
+            {
+                // TODO
             }
 
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool TeamIdExists(int id)
-        {
-            return _context.Teams.Any(e => e.Id == id);
-        }
-
-        private bool TeamNameExists(string name)
-        {
-            return _context.Teams.Any(e => e.Name == name);
         }
     }
 }
