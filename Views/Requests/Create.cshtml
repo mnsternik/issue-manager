@@ -46,7 +46,7 @@
                         <div class="col-md-6">
                             <div class="form-floating">
                                 <select asp-for="CategoryId" class="form-select app-form-control"
-                                        asp-items="ViewBag.CategorySelectOptions">
+                                        asp-items="Model.SelectLists.CategorySelectOptions">
                                     <option value="">-- Select --</option>
                                 </select>
                                 <label asp-for="CategoryId"></label>
@@ -57,7 +57,7 @@
                         <div class="col-md-6">
                             <div class="form-floating">
                                 <select asp-for="AssignedUserId" class="form-select app-form-control" id="assignedUserSelect"
-                                        asp-items="ViewBag.UserSelectOptions">
+                                        asp-items="Model.SelectLists.UserSelectOptions">
                                     <option value="">-- Select --</option>
                                 </select>
                                 <label asp-for="AssignedUserId"></label>
@@ -67,7 +67,7 @@
                         <div class="col-md-6">
                             <div class="form-floating">
                                 <select asp-for="AssignedTeamId" class="form-select app-form-control" id="assignedTeamSelect"
-                                        asp-items="ViewBag.TeamSelectOptions">
+                                        asp-items="Model.SelectLists.TeamSelectOptions">
                                     <option value="">-- Select --</option>
                                 </select>
                                 <label asp-for="AssignedTeamId"></label>
@@ -113,7 +113,7 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
 
         <script id="usersByTeamData" type="application/json">
-            @Html.Raw(Json.Serialize(ViewBag.UsersByTeam))
+            @Html.Raw(Json.Serialize(Model.SelectLists.UsersByTeam))
         </script>
 
         <script src="~/js/filterUsersByGroup.js"></script>

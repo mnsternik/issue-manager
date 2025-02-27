@@ -31,7 +31,7 @@
                     <div class="row g-4">
                         <div class="col-12">
                             <div class="form-floating">
-                                <input asp-for="Title" class="form-control app-form-control" placeholder="Enter title" />
+                                <input asp-for="Title" class="form-control app-form-control" placeholder="Enter title" disabled/>
                                 <label asp-for="Title"></label>
                                 <span asp-validation-for="Title" class="validation-message"></span>
                             </div>
@@ -40,7 +40,7 @@
                         <div class="col-12">
                             <div class="form-floating">
                                 <textarea asp-for="Description" class="form-control app-form-control"
-                                          style="height: 200px" placeholder="Enter description"></textarea>
+                                          style="height: 200px" placeholder="Enter description" disabled></textarea>
                                 <label asp-for="Description"></label>
                                 <span asp-validation-for="Description" class="validation-message"></span>
                             </div>
@@ -69,16 +69,17 @@
                         <div class="col-md-6">
                             <div class="form-floating">
                                 <select asp-for="CategoryId" class="form-select app-form-control"
-                                        asp-items="ViewBag.CategorySelectOptions">
+                                        asp-items="Model.SelectLists.CategorySelectOptions">
                                     <option value="">-- Select --</option>
                                 </select>
                                 <label asp-for="CategoryId"></label>
+                                <span asp-validation-for="CategoryId" class="validation-message"></span>
                             </div>
                         </div>
 
                         <div class="col-6">
                             <div class="form-floating">
-                                <input asp-for="UpdateDate" class="form-control app-form-control" disabled />
+                                <input asp-for="UpdateDate" asp-format="{0:dd/MM/yyyy HH:mm:ss}" type="text" class="form-control app-form-control" disabled />
                                 <label asp-for="UpdateDate"></label>
                             </div>
                         </div>
@@ -86,7 +87,7 @@
                         <div class="col-md-6">
                             <div class="form-floating">
                                 <select asp-for="AssignedTeamId" class="form-select app-form-control" id="assignedTeamSelect"
-                                        asp-items="ViewBag.TeamSelectOptions">
+                                        asp-items="Model.SelectLists.TeamSelectOptions">
                                     <option value="">-- Select --</option>
                                 </select>
                                 <label asp-for="AssignedTeamId"></label>
@@ -96,7 +97,7 @@
                         <div class="col-md-6">
                             <div class="form-floating">
                                 <select asp-for="AssignedUserId" class="form-select app-form-control" id="assignedUserSelect"
-                                        asp-items="ViewBag.UserSelectOptions">
+                                        asp-items="Model.SelectLists.UserSelectOptions">
                                     <option value="">-- Select --</option>
                                 </select>
                                 <label asp-for="AssignedUserId"></label>
@@ -125,7 +126,7 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
 
         <script id="usersByTeamData" type="application/json">
-            @Html.Raw(Json.Serialize(ViewBag.UsersByTeam))
+            @Html.Raw(Json.Serialize(Model.SelectLists.UsersByTeam))
         </script>
 
         <script src="~/js/filterUsersByGroup.js"></script>

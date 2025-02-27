@@ -25,7 +25,7 @@
                     }
                     @if (Model.AllowEdit)
                     {
-                        <a asp-action="Edit" asp-route-id="@Model?.Id" class="app-btn app-btn-main">Edit</a>
+                        <a asp-action="Edit" asp-route-id="@Model!.Id" class="app-btn app-btn-main">Edit</a>
                     }
                 </div>
 
@@ -33,6 +33,13 @@
                     <h2 class="mb-0 fs-3">Request ID: @Model.Id</h2>
                     <p class="mb-0 opacity-75">Created at @Model.CreateDate by @Model.AuthorName</p>
                 </div>
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger" role="alert">
+                        @TempData["ErrorMessage"]
+                    </div>
+                }
 
                 <div class="row g-4">
                     <div class="col-12">
@@ -73,7 +80,7 @@
                     <div class="col-md-6">
                         <div class="d-flex flex-column">
                             <label class="details-label">Last update date</label>
-                            <span class="details-data">@Model.UpdateDate</span>
+                            <span class="details-data">@(Model.UpdateDate == null ? "None" : Model.UpdateDate)</span>
                         </div>
                     </div>
 
@@ -97,7 +104,6 @@
                 </div>
                 <hr />
                 <partial name="_RequestResponsePartial" model="Model.Responses" />
-                <hr />
                 <partial name="_AttachmentsPartial" model="Model.Attachments" />
             </div>
         </div>

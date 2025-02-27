@@ -1,4 +1,4 @@
-﻿@model IssueManager.Models.ViewModels.UserManagement.UsersListViewModel
+﻿@model IssueManager.Models.ViewModels.Users.UsersListViewModel
 @{
     ViewData["Title"] = "UserManagement";
 }
@@ -14,7 +14,7 @@
             <div class="col-12 col-md-6" style="text-align: end">
                 <a asp-action="Create" class="app-btn app-btn-create">Create</a>
             </div>
-            <form class="col-12 col-md-6" asp-controller="UserManagement" asp-action="Index" method="get">
+            <form class="col-12 col-md-6" asp-controller="Users" asp-action="Index" method="get">
                 <div class="d-flex gap-1">
                     <input class="form-control app-form-control w-100" type="text" name="search" placeholder="Search by name or email" />
                     <button type="submit" class="app-link app-link-main">
@@ -26,6 +26,13 @@
             </form>
         </div>
 
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success" role="alert">
+                @TempData["SuccessMessage"]
+            </div>
+        }
+
         <div class="table-responsive">
             <table class="table app-table">
                 <thead>
@@ -33,15 +40,21 @@
                         <th>Name</th>
                         <th>@Html.DisplayNameFor(model => model.Users[0].Email)</th>
                         <th>@Html.DisplayNameFor(model => model.Users[0].TeamName)</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var item in Model.Users)
                     {
-                        <tr onclick="location.href = '@Url.Action("ManageUser", "UserManagement", new { id = item.Id })'" style="cursor: pointer">
+                        <tr>
                             <td>@Html.DisplayFor(modelItem => item.Name)</td>
                             <td>@Html.DisplayFor(modelItem => item.Email)</td>
                             <td>@Html.DisplayFor(modelItem => item.TeamName)</td>
+                            <td class="text-end">
+                                <a asp-action="ChangeUserDetails" asp-route-id="@item.Id" class="app-link">Details</a> |
+                                <a asp-action="ChangeUserRoles" asp-route-id="@item.Id" class="app-link">Roles</a> |
+                                <a asp-action="ChangeUserPassword" asp-route-id="@item.Id" class="app-link">Password</a>
+                            </td>
                         </tr>
                     }
                 </tbody>

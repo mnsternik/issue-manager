@@ -65,7 +65,7 @@
                     <div class="col-md-3">
                         <div class="form-floating">
                             <select asp-for="Filters.CategoryId" class="form-select app-form-control"
-                            asp-items="ViewBag.CategorySelectOptions">
+                            asp-items="Model.SelectLists.CategorySelectOptions">
                                 <option value="">-- Select --</option>
                             </select>
                             <label asp-for="Filters.CategoryId"></label>
@@ -87,7 +87,7 @@
                     <div class="col-md-3">
                         <div class="form-floating">
                             <select asp-for="Filters.AssignedUserId" class="form-select app-form-control" id="assignedUserSelect"
-                            asp-items="ViewBag.UserSelectOptions">
+                            asp-items="Model.SelectLists.UserSelectOptions">
                                 <option value="">-- Select --</option>
                             </select>
                             <label asp-for="Filters.AssignedUserId"></label>
@@ -97,7 +97,7 @@
                     <div class="col-md-3">
                         <div class="form-floating">
                             <select asp-for="Filters.AssignedTeamId" class="form-select app-form-control" id="assignedTeamSelect"
-                            asp-items="ViewBag.TeamSelectOptions">
+                            asp-items="Model.SelectLists.TeamSelectOptions">
                                 <option value="">-- Select --</option>
                             </select>
                             <label asp-for="Filters.AssignedTeamId"></label>
@@ -172,7 +172,7 @@
                                 <td>@ViewHelpers.Truncate(item.Title)</td>
                                 <td>
                                     <span class="app-badge @(item.Status.ToString().ToLower())"
-                                          style="background-color: @ViewHelpers.GetStatusColor(item.Status)">
+                                          style="background-color: @ViewHelpers.GetStatusColor(item.Status); white-space: nowrap">
                                         @Html.DisplayFor(modelItem => item.Status)
                                     </span>
                                 </td>
@@ -231,7 +231,7 @@
 @section Scripts {
     @{
         <script id="usersByTeamData" type="application/json">
-            @Html.Raw(Json.Serialize(ViewBag.UsersByTeam))
+            @Html.Raw(Json.Serialize(Model.SelectLists.UsersByTeam))
         </script>
 
         <script src="~/js/filterUsersByGroup.js"></script>
