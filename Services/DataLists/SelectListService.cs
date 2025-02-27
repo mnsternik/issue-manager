@@ -1,10 +1,10 @@
 ﻿using IssueManager.Data;
 using IssueManager.Models;
-using IssueManager.Models.ViewModels.Common;
+using IssueManager.Models.ViewModels.Requests;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using static IssueManager.Models.ViewModels.Common.RequestsSelectListsViewModel;
+using static IssueManager.Models.ViewModels.Requests.RequestsSelectListsViewModel;
 
-namespace IssueManager.Services.SelectLists
+namespace IssueManager.Services.DataLists
 {
     public class SelectListService : ISelectListService
     {
@@ -31,6 +31,12 @@ namespace IssueManager.Services.SelectLists
             };
 
             return viewModel; 
+        }
+
+        public IEnumerable<SelectListItem> PopulateTeamSelectList(int? selectedTeamId = null)
+        {
+            var teamSelectList = new SelectList(_context.Teams, nameof(Team.Id), nameof(Team.Name), selectedTeamId);
+            return teamSelectList;
         }
     }
 }
