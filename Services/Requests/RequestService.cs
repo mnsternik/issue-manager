@@ -86,6 +86,7 @@ namespace IssueManager.Services.Requests
             var request = _mapper.Map<Request>(requestViewModel);
 
             request.AuthorId = user!.Id;
+            request.CreateDate = DateTime.UtcNow;
             request.Attachments = await _fileService.ProcessFilesAsync(requestViewModel.Files);
 
             _context.Add(request);
