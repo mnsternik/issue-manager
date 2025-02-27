@@ -17,7 +17,7 @@ namespace IssueManager.Models
         [Required]
         public RequestPriority Priority { get; set; }
         [Required]
-        public DateTime CreateDate { get; set; } = DateTime.UtcNow;
+        public DateTime CreateDate { get; set; } 
         public DateTime? UpdateDate { get; set; } 
 
         [Required]
