@@ -1,29 +1,22 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using IssueManager.Models;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using IssueManager.Utilities;
 using IssueManager.Models.ViewModels.Requests;
 using IssueManager.Services.Requests;
 using IssueManager.Exceptions;
-using IssueManager.Services.Files;
-using IssueManager.Services.SelectLists;
+using IssueManager.Services.DataLists;
 
 namespace IssueManager.Controllers
 {
     public class RequestsController : Controller
     {
-        private readonly UserManager<User> _userManager;
         private readonly IRequestService _requestsService;
-        private readonly IFileService _fileService; 
         private readonly ISelectListService _selectListService;
 
-        public RequestsController(UserManager<User> userManager, IRequestService requestsService, IFileService fileService, ISelectListService selectListService)
+        public RequestsController(IRequestService requestsService, ISelectListService selectListService)
         {
-            _userManager = userManager;
             _requestsService = requestsService;
-            _fileService = fileService;
             _selectListService = selectListService;
         }
 
@@ -39,7 +32,7 @@ namespace IssueManager.Controllers
             }
 
             var requestsListViewModel = await _requestsService.GetRequestsAsync(filters, pageIndex);
-
+            requestsListViewModel.SelectLists = _selectListService.PopulateRequestSelectLists();
             return View(requestsListViewModel);
         }
 
@@ -65,7 +58,11 @@ namespace IssueManager.Controllers
         [Authorize(Roles = "User,Admin")]
         public IActionResult Create()
         {
-            var requestViewModel = _requestsService.GetCreateRequest();
+            var requestViewModel = new CreateRequestViewModel
+            {
+                SelectLists = _selectListService.PopulateRequestSelectLists()
+            };
+
             return View(requestViewModel);
         }
 
@@ -77,31 +74,34 @@ namespace IssueManager.Controllers
         {
             if (ModelState.IsValid)
             {
-                var currentUserId = _userManager.GetUserId(User)!;
                 int? newRequestId;
 
                 try
                 {
-                   newRequestId = await _requestsService.CreateRequestAsync(requestViewModel, currentUserId);
+                   newRequestId = await _requestsService.CreateRequestAsync(requestViewModel, User);
+                   return RedirectToAction(nameof(Details), new { Id = newRequestId });
                 }
                 catch (InvalidFileTypeException ex)
                 {
                     ModelState.AddModelError("", ex.Message);
-                    requestViewModel.SelectLists = _selectListService.PopulateRequestSelectLists(requestViewModel.AssignedUserId, requestViewModel.AssignedTeamId, requestViewModel.CategoryId);
-                    return View(requestViewModel);
                 }
-
-                return RedirectToAction(nameof(Details), new { Id = newRequestId }); 
             }
 
-            requestViewModel.SelectLists = _selectListService.PopulateRequestSelectLists(requestViewModel.AssignedUserId, requestViewModel.AssignedTeamId, requestViewModel.CategoryId);
+            requestViewModel.SelectLists = _selectListService.PopulateRequestSelectLists(
+                requestViewModel.AssignedUserId,
+                requestViewModel.AssignedTeamId,
+                requestViewModel.CategoryId
+            );
             return View(requestViewModel);
         }
 
         public async Task<IActionResult> DownloadFile(int id)
         {
-            var file = await _fileService.GetAttachmentAsync(id); 
-            if (file == null) return NotFound();
+            var file = await _requestsService.GetAttachmentAsync(id);
+            if (file == null)
+            {
+                return NotFound();
+            }
 
             return File(file.FileData, file.ContentType, file.FileName);
         }
@@ -121,7 +121,7 @@ namespace IssueManager.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                throw; // what to do?
+                TempData["ErrorMessage"] = "This record was edited by another user. Please refresh the page and try again.";
             }
 
             return RedirectToAction(nameof(Details), new { Id = id });
@@ -143,6 +143,11 @@ namespace IssueManager.Controllers
                 return NotFound();
             }
 
+            requestViewModel.SelectLists = _selectListService.PopulateRequestSelectLists(
+                requestViewModel.AssignedUserId, 
+                requestViewModel.AssignedTeamId, 
+                requestViewModel.CategoryId
+            );
             return View(requestViewModel);
         }
 
@@ -163,7 +168,7 @@ namespace IssueManager.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                // TODO
+                ModelState.AddModelError("", "This record was edited by another user. Please refresh the page and try again.");
             }
 
             if (ModelState.IsValid)
@@ -172,7 +177,11 @@ namespace IssueManager.Controllers
                 return RedirectToAction(nameof(Details), new { Id = id });
             }
 
-            requestViewModel.SelectLists = _selectListService.PopulateRequestSelectLists(requestViewModel.AssignedUserId, requestViewModel.AssignedTeamId, requestViewModel.CategoryId);
+            requestViewModel.SelectLists = _selectListService.PopulateRequestSelectLists(
+                requestViewModel.AssignedUserId, 
+                requestViewModel.AssignedTeamId, 
+                requestViewModel.CategoryId
+            );
             return View(requestViewModel);
         }
 
@@ -180,16 +189,14 @@ namespace IssueManager.Controllers
         [Authorize(Roles = "User,Admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddResponse(int requestId, string responseText)
-        {
-            var currentUserId = _userManager.GetUserId(User)!;
-            
+        {            
             try
             {
-                await _requestsService.AddResponseAsync(requestId, responseText, currentUserId);
+                await _requestsService.AddResponseAsync(requestId, responseText, User);
             }
-            catch (Exception) // what kinds of execptions may occur here?
+            catch (Exception) 
             {
-                // TODO 
+                return NotFound(); 
             }
 
             return RedirectToAction("Edit", new { id = requestId });

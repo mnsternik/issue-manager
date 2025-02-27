@@ -42,14 +42,13 @@ namespace IssueManager.Controllers
                 try
                 {
                     await _teamService.CreateTeamAsync(teamViewModel);
+                    TempData["SuccessMessage"] = "New team created successfully!";
+                    return RedirectToAction(nameof(Index));
                 } 
                 catch (NameAlreadyExistsException) 
                 {
                     ModelState.AddModelError("Name", "Team with this name already exists");
-                    return View(teamViewModel);
                 }
-
-                return RedirectToAction(nameof(Index));
             }
 
             return View(teamViewModel);
@@ -90,18 +89,17 @@ namespace IssueManager.Controllers
                 try
                 {
                     await _teamService.EditTeamAsync(team);
+                    TempData["SuccessMessage"] = "Team updated successfully!";
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (NameAlreadyExistsException)
                 {
                     ModelState.AddModelError("Name", "Team with this name already exists");
-                    return View(team);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    // TODO 
+                    ModelState.AddModelError("", "This record was edited by another user. Please refresh the page and try again.");
                 }
-
-                return RedirectToAction(nameof(Index));
             }
 
             return View(team);
@@ -134,11 +132,13 @@ namespace IssueManager.Controllers
         {
             try
             {
-                await _teamService.DeleteTeamAsync(id); 
+                await _teamService.DeleteTeamAsync(id);
+                TempData["SuccessMessage"] = "Team deleted successfully!";
+                return RedirectToAction(nameof(Index));
             }
-            catch
+            catch (DbUpdateConcurrencyException)
             {
-                // TODO
+                ModelState.AddModelError("", "This record was edited by another user. Please refresh the page and try again.");
             }
 
             return RedirectToAction(nameof(Index));
