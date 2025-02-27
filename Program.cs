@@ -8,6 +8,10 @@ using System.Globalization;
 using Microsoft.AspNetCore.Http.Features;
 using IssueManager.Services.Requests;
 using IssueManager.Services.Files;
+using IssueManager.Services.DataLists;
+using IssueManager.Services.Users;
+using IssueManager.Services.Teams;
+using IssueManager.Services.Categories;
 
 namespace IssueManager
 {
@@ -43,7 +47,12 @@ namespace IssueManager
             builder.Services.AddAutoMapper(typeof(MappingProfile));
             builder.Services.AddTransient<DataSeeder>();
             builder.Services.AddTransient<IRequestService, RequestService>();
+            builder.Services.AddTransient<IUserService, UserService>();
+            builder.Services.AddTransient<ITeamService, TeamService>();
+            builder.Services.AddTransient<ICategoryService, CategoryService>();
             builder.Services.AddTransient<IFileService, FileService>();
+            builder.Services.AddTransient<ISelectListService, SelectListService>();
+            builder.Services.AddTransient<IRoleListService, RoleListService>();
 
             var cultureInfo = new CultureInfo("en-GB"); 
             CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
