@@ -1,5 +1,4 @@
-﻿using IssueManager.Models.ViewModels.Common;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace IssueManager.Models.ViewModels.Requests
 {
@@ -9,11 +8,11 @@ namespace IssueManager.Models.ViewModels.Requests
 
         [Required]
         [MaxLength(100)]
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
 
         [Required]
         [MaxLength(1000)]
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
 
         [Required]
         public RequestPriority Priority { get; set; }
@@ -26,9 +25,9 @@ namespace IssueManager.Models.ViewModels.Requests
         [Display(Name = "Last update date")]
         public DateTime? UpdateDate { get; set; }
 
-        public string AuthorName { get; set; }
+        public string AuthorName { get; set; } = string.Empty;
 
-        public string AuthorId { get; set; }
+        public string AuthorId { get; set; } = string.Empty;
 
         [Required]
         [Display(Name = "Category")]

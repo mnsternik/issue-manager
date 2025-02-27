@@ -1,6 +1,6 @@
 ﻿using IssueManager.Utilities;
 
-namespace IssueManager.Models.ViewModels.UserManagement
+namespace IssueManager.Models.ViewModels.Users
 {
     public class UsersListViewModel
     {

@@ -7,7 +7,7 @@ namespace IssueManager.Models
         public int Id { get; set; }
 
         [Required]
-        public string AuthorId { get; set; }
+        public string AuthorId { get; set; } = string.Empty;
 
         [Required]
         public int RequestId { get; set; }
@@ -16,7 +16,7 @@ namespace IssueManager.Models
         public DateTime CreateDate { get; set; } = DateTime.UtcNow;
 
         [Required]
-        public string ResponseText { get; set; }
+        public string ResponseText { get; set; } = string.Empty;
 
         [Required]
         public User Author { get; set; }

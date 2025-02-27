@@ -1,5 +1,4 @@
-﻿using IssueManager.Models.ViewModels.Common;
-using IssueManager.Services.SelectLists;
+﻿using IssueManager.Services.DataLists;
 using System.ComponentModel.DataAnnotations;
 
 namespace IssueManager.Models.ViewModels.Requests
@@ -17,7 +16,7 @@ namespace IssueManager.Models.ViewModels.Requests
         [Required]
         public RequestPriority Priority { get; set; }
 
-        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedDate { get; set; } 
 
         [Required]
         [Display(Name = "Category")]

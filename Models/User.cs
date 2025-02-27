@@ -6,7 +6,7 @@ namespace IssueManager.Models
     public class User : IdentityUser
     {
         [Required]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [Required]
         public int TeamId { get; set; }

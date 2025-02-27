@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace IssueManager.Models.ViewModels.Common
+namespace IssueManager.Models.ViewModels.Requests
 {
     public class RequestsSelectListsViewModel
     {

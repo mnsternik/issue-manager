@@ -1,5 +1,4 @@
-﻿using IssueManager.Models.ViewModels.Common;
-using IssueManager.Utilities;
+﻿using IssueManager.Utilities;
 using System.ComponentModel.DataAnnotations;
 
 namespace IssueManager.Models.ViewModels.Requests
