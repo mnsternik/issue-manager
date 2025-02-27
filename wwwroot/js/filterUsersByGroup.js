@@ -11,7 +11,7 @@
         const selectedUserId = this.value;
 
         for (const [teamId, users] of Object.entries(usersByTeam)) {
-            if (users.some(user => user.Id == selectedUserId)) {
+            if (users.some(user => user.id == selectedUserId)) {
                 assignedTeamSelect.value = teamId; 
                 break; 
             }
@@ -29,8 +29,8 @@
             for (const team in usersByTeam) {
                 usersByTeam[team].forEach(user => {
                     const option = document.createElement("option");
-                    option.value = user.Id;
-                    option.textContent = user.Name;
+                    option.value = user.id;
+                    option.textContent = user.name;
                     assignedUserSelect.appendChild(option);
                 })
             }
@@ -42,8 +42,8 @@
         if (usersByTeam[selectedTeamId]) {
             usersByTeam[selectedTeamId].forEach(user => {
                 const option = document.createElement("option");
-                option.value = user.Id;
-                option.textContent = user.Name;
+                option.value = user.id;
+                option.textContent = user.name;
                 assignedUserSelect.appendChild(option); 
             })
         }
