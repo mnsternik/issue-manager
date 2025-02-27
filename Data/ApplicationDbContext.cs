@@ -1,7 +1,6 @@
 ﻿using IssueManager.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
 
 namespace IssueManager.Data
 {
@@ -62,7 +61,6 @@ namespace IssueManager.Data
         public DbSet<Team> Teams { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Attachment> Attachments { get; set; }
-        public DbSet<Notification> Notifications { get; set; }
 
     }
 }
