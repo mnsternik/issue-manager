@@ -37,6 +37,10 @@ namespace IssueManager
                 .AddRoles<IdentityRole>() 
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
+            builder.Logging.ClearProviders();
+            builder.Logging.AddConsole();
+            builder.Logging.AddDebug();
+
             builder.Services.Configure<FormOptions>(options =>
             {
                 options.MultipartBodyLengthLimit = 2 * 1024 * 1024;
