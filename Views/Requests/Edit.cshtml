@@ -31,7 +31,7 @@
                     <div class="row g-4">
                         <div class="col-12">
                             <div class="form-floating">
-                                <input asp-for="Title" class="form-control app-form-control" placeholder="Enter title" disabled/>
+                                <input asp-for="Title" class="form-control app-form-control" placeholder="Enter title" readonly/>
                                 <label asp-for="Title"></label>
                                 <span asp-validation-for="Title" class="validation-message"></span>
                             </div>
@@ -40,7 +40,7 @@
                         <div class="col-12">
                             <div class="form-floating">
                                 <textarea asp-for="Description" class="form-control app-form-control"
-                                          style="height: 200px" placeholder="Enter description" disabled></textarea>
+                                          style="height: 200px" placeholder="Enter description" readonly></textarea>
                                 <label asp-for="Description"></label>
                                 <span asp-validation-for="Description" class="validation-message"></span>
                             </div>
@@ -79,7 +79,7 @@
 
                         <div class="col-6">
                             <div class="form-floating">
-                                <input asp-for="UpdateDate" asp-format="{0:dd/MM/yyyy HH:mm:ss}" type="text" class="form-control app-form-control" disabled />
+                                <input asp-for="UpdateDate" asp-format="{0:dd/MM/yyyy HH:mm:ss}" type="text" class="form-control app-form-control" readonly />
                                 <label asp-for="UpdateDate"></label>
                             </div>
                         </div>
