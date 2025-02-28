@@ -13,7 +13,7 @@ namespace IssueManager.Models
         public int RequestId { get; set; }
 
         [Required]
-        public DateTime CreateDate { get; set; } = DateTime.UtcNow;
+        public DateTime CreateDate { get; set; } 
 
         [Required]
         public string ResponseText { get; set; } = string.Empty;
