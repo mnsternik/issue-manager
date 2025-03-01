@@ -30,6 +30,7 @@ namespace IssueManager.Services.Teams
             {
                 IQueryable<Team> query = _context.Teams.AsNoTracking();
 
+                // Applying search filters if there are any 
                 if (!string.IsNullOrEmpty(search))
                 {
                     _logger.LogDebug("Applying team search filter: {Search}", search);

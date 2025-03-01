@@ -3,7 +3,6 @@ using IssueManager.Data;
 using IssueManager.Exceptions;
 using IssueManager.Models;
 using IssueManager.Models.ViewModels.Users;
-using IssueManager.Services.DataLists;
 using IssueManager.Utilities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -33,6 +32,7 @@ namespace IssueManager.Services.Users
             {
                 IQueryable<User> query = _context.Users;
 
+                // Applying search filters if there are any 
                 if (!string.IsNullOrEmpty(search))
                 {
                     _logger.LogDebug("Applying user search filter: {Search}", search);
@@ -68,8 +68,8 @@ namespace IssueManager.Services.Users
                 var user = _mapper.Map<User>(userViewModel);
                 user.UserName = user.Email;
 
+                // Creating new account and checking for errors
                 var createResult = await _userManager.CreateAsync(user, userViewModel.Password);
-
                 if (!createResult.Succeeded)
                 {
                     var errors = string.Join(", ", createResult.Errors.Select(e => e.Description));
@@ -79,6 +79,7 @@ namespace IssueManager.Services.Users
 
                 _logger.LogInformation("Successfully created user {UserId}", user.Id);
 
+                // Assigning selected roles to newly created account, and checking for errors
                 foreach (var role in userViewModel.RolesList.SelectedRoles)
                 {
                     _logger.LogDebug("Adding role {Role} to user {UserId}", role, user.Id);
@@ -107,7 +108,6 @@ namespace IssueManager.Services.Users
             try
             {
                 var user = await _context.Users.FindAsync(id);
-
                 if (user == null)
                 {
                     _logger.LogWarning("User {UserId} not found for details view", id);
@@ -130,6 +130,7 @@ namespace IssueManager.Services.Users
 
             try
             {
+                // Retriving user record to edit 
                 var user = await _context.Users.FindAsync(userViewModel.Id);
                 if (user == null)
                 {
@@ -137,12 +138,14 @@ namespace IssueManager.Services.Users
                     throw new UserOperationException(["User not found"]);
                 }
 
+                // Retriving team of user record to edit
                 var team = await _context.Teams.FindAsync(userViewModel.TeamId);
                 if (team == null)
                 {
                     _logger.LogWarning("Team {TeamId} not found for user {UserId}", userViewModel.TeamId, userViewModel.Id);
                 }
 
+                // Updating user's data
                 user.Team = team!;
                 user.Email = userViewModel.Email!;
                 user.Name = userViewModel.Name!;
@@ -193,6 +196,7 @@ namespace IssueManager.Services.Users
 
             try
             {
+                // Retriving user record to edit 
                 var user = await _context.Users.FindAsync(userViewModel.Id);
                 if (user == null)
                 {
@@ -200,9 +204,11 @@ namespace IssueManager.Services.Users
                     throw new UserOperationException(["User not found"]);
                 }
 
+                // Retriving user's roles 
                 var currentRoles = await _userManager.GetRolesAsync(user);
                 _logger.LogDebug("Current roles for user {UserId}: {Roles}", user.Id, string.Join(", ", currentRoles));
 
+                // Deleting current roles if there are any
                 if (currentRoles.Any())
                 {
                     _logger.LogInformation("Removing existing roles from user {UserId}", user.Id);
@@ -216,6 +222,7 @@ namespace IssueManager.Services.Users
                     }
                 }
 
+                // Adding new roles if there are some selected
                 if (userViewModel.RolesList.SelectedRoles.Count > 0)
                 {
                     _logger.LogInformation("Adding new roles to user {UserId}: {Roles}",
@@ -269,6 +276,7 @@ namespace IssueManager.Services.Users
 
             try
             {
+                // Retriving user record to edit 
                 var user = await _context.Users.FindAsync(userViewModel.Id);
                 if (user == null)
                 {
@@ -276,6 +284,7 @@ namespace IssueManager.Services.Users
                     throw new UserOperationException(["User not found"]);
                 }
 
+                // Deleting old password
                 if (!string.IsNullOrEmpty(userViewModel.Password))
                 {
                     _logger.LogInformation("Removing existing password for user {UserId}", user.Id);
@@ -288,9 +297,9 @@ namespace IssueManager.Services.Users
                         throw new UserOperationException(removeResult.Errors.Select(r => r.Description).ToList());
                     }
 
+                    // Adding new password
                     _logger.LogInformation("Adding new password for user {UserId}", user.Id);
                     var addResult = await _userManager.AddPasswordAsync(user, userViewModel.Password);
-
                     if (!addResult.Succeeded)
                     {
                         var errors = string.Join(", ", addResult.Errors.Select(e => e.Description));

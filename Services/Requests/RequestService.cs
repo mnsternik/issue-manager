@@ -33,6 +33,7 @@ namespace IssueManager.Services.Requests
 
             try
             {
+                // Retriving request sorted by CreateDate, appling search filter and then mapping to view model
                 IQueryable<Request> baseQuery = _context.Requests
                     .AsNoTracking()
                     .OrderByDescending(r => r.CreateDate);
@@ -78,6 +79,7 @@ namespace IssueManager.Services.Requests
                     return requestViewModel;
                 }
 
+                // Checking current user's roles and team, to see if he's allowed to assign request to himself 
                 var userRoles = await _userManager.GetRolesAsync(user);
                 var currentUserTeamId = await _context.Users
                     .AsNoTracking()
@@ -92,7 +94,6 @@ namespace IssueManager.Services.Requests
 
                 requestViewModel.AllowAssign = !isCurrentUserAlreadyAssigned
                     && (isUserMemberOfAssignedTeam || isReqNotAssignedToAnyTeam || isUserAdmin);
-
                 requestViewModel.AllowEdit = isCurrentUserAlreadyAssigned;
 
                 _logger.LogDebug("Permission calculation for request {RequestId}: AllowAssign={AllowAssign}, AllowEdit={AllowEdit}",

@@ -29,6 +29,7 @@ namespace IssueManager.Services.Categories
             {
                 IQueryable<Category> query = _context.Categories;
 
+                // Applying search filters if there are any
                 if (!string.IsNullOrEmpty(search))
                 {
                     _logger.LogDebug("Applying search filter: {Search}", search);
