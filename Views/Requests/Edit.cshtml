@@ -21,6 +21,13 @@
                         <p class="mb-0 opacity-75">Created at @Model.CreateDate by @Model.AuthorName</p>
                     </div>
 
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            @TempData["ErrorMessage"]
+                        </div>
+                    }
+
                     <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3" role="alert"></div>
 
                     <input type="hidden" asp-for="Id" />
