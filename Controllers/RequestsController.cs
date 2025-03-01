@@ -81,7 +81,7 @@ namespace IssueManager.Controllers
                    newRequestId = await _requestsService.CreateRequestAsync(requestViewModel, User);
                    return RedirectToAction(nameof(Details), new { Id = newRequestId });
                 }
-                catch (InvalidFileTypeException ex)
+                catch (FileProcessingException ex)
                 {
                     ModelState.AddModelError("", ex.Message);
                 }
@@ -196,7 +196,7 @@ namespace IssueManager.Controllers
             }
             catch (Exception) 
             {
-                return NotFound(); 
+                TempData["ErrorMessage"] = "Error occurs while trying to create response.";
             }
 
             return RedirectToAction("Edit", new { id = requestId });

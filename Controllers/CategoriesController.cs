@@ -25,7 +25,6 @@ namespace IssueManager.Controllers
         }
 
         // GET: Categories/Create
-        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             return View();
