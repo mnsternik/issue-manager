@@ -8,17 +8,19 @@ namespace IssueManager.Utilities
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
+        private readonly ILogger<DataSeeder> _logger;
 
-        public DataSeeder(UserManager<User> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
+        public DataSeeder(UserManager<User> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration, ILogger<DataSeeder> logger)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _configuration = configuration;
+            _logger = logger;
         }
 
         public async Task CreateRoles()
         {
-            var roles = new[] { "Admin", "User", "Guest" };
+            var roles = new[] { "Admin", "User" };
 
             foreach (var role in roles)
             {
@@ -34,9 +36,15 @@ namespace IssueManager.Utilities
             var email = _configuration["AdminUser:Email"];
             var password = _configuration["AdminUser:Password"];
 
-            if (email == null || password == null)
+            if (email == null)
             {
-                // TODO: Log that no data in secrets
+                _logger.LogError("Address email for admin account not found");
+                return;
+            }
+
+            if (password == null)
+            {
+                _logger.LogError("Password for admin account not found");
                 return;
             }
 
@@ -44,7 +52,7 @@ namespace IssueManager.Utilities
             {
                 var user = new User
                 {
-                    UserName = "Admin",
+                    Name = "Admin",
                     Email = email,
                     EmailConfirmed = true,
                     TeamId = 2 // ID of a team "Helpdesk" seeded in ApplicationDbContext 
@@ -58,7 +66,8 @@ namespace IssueManager.Utilities
                 }
                 else
                 {
-                    // TODO: Log that failed to create account 
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    _logger.LogError("Creation of admin user failed. Errors: {errors}", errors);
                 }   
             }
         }
