@@ -1,4 +1,4 @@
-namespace IssueManager.Tests
+namespace IssueManager.Test
 {
     public class UnitTest1
     {
