@@ -1,5 +1,7 @@
-﻿using IssueManager.Models;
+﻿using IssueManager.Data;
+using IssueManager.Models;
 using Microsoft.AspNetCore.Identity;
+using System.Data;
 
 namespace IssueManager.Utilities
 {
@@ -7,13 +9,20 @@ namespace IssueManager.Utilities
     {
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly ILogger<DataSeeder> _logger;
 
-        public DataSeeder(UserManager<User> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration, ILogger<DataSeeder> logger)
+        public DataSeeder(
+            UserManager<User> userManager,
+            RoleManager<IdentityRole> roleManager,
+            ApplicationDbContext context,
+            IConfiguration configuration, 
+            ILogger<DataSeeder> logger)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _context = context;
             _configuration = configuration;
             _logger = logger;
         }
@@ -31,10 +40,17 @@ namespace IssueManager.Utilities
             }
         }
 
+        // If there is no team defined in db, call CreateAndReturnDefaultTeam to create a default team and assign admin account to it 
         public async Task CreateAdminUser()
         {
             var email = _configuration["AdminUser:Email"];
             var password = _configuration["AdminUser:Password"];
+            var team = _context.Teams.FirstOrDefault();
+
+            if (team == null)
+            {
+                team = await CreateAndReturnDefaultTeam();
+            }
 
             if (email == null)
             {
@@ -55,7 +71,7 @@ namespace IssueManager.Utilities
                     Name = "Admin",
                     Email = email,
                     EmailConfirmed = true,
-                    TeamId = 2 // ID of a team "Helpdesk" seeded in ApplicationDbContext 
+                    TeamId = team.Id
                 };
 
                 var result = await _userManager.CreateAsync(user, password);
@@ -69,6 +85,22 @@ namespace IssueManager.Utilities
                     var errors = string.Join(", ", result.Errors.Select(e => e.Description));
                     _logger.LogError("Creation of admin user failed. Errors: {errors}", errors);
                 }   
+            }
+        }
+
+        private async Task<Team> CreateAndReturnDefaultTeam()
+        {
+            var defaultTeam = new Team { Name = "Default" };
+            try
+            {
+                _context.Add(defaultTeam);
+                await _context.SaveChangesAsync();
+                return defaultTeam;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Creation of default team failed: Error: {ex}", ex.Message);
+                throw; 
             }
         }
     }
