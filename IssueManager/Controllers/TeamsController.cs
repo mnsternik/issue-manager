@@ -133,11 +133,10 @@ namespace IssueManager.Controllers
             {
                 await _teamService.DeleteTeamAsync(id);
                 TempData["SuccessMessage"] = "Team deleted successfully!";
-                return RedirectToAction(nameof(Index));
             }
             catch (DbUpdateConcurrencyException)
             {
-                ModelState.AddModelError("", "This record was edited by another user. Please refresh the page and try again.");
+                TempData["ErrorMessage"] = "This record was edited by another user. Please refresh the page and try again.";
             }
 
             return RedirectToAction(nameof(Index));
