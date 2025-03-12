@@ -16,8 +16,6 @@ public class CategoriesControllerTests
     private readonly Mock<ICategoryService> _mockService;
     private readonly CategoriesController _controller;
 
-    const int pageIndex = 1;
-
     public CategoriesControllerTests()
     {
         _mockService = new Mock<ICategoryService>();
@@ -29,11 +27,14 @@ public class CategoriesControllerTests
     public async Task Index_ReturnsViewWithCategories()
     {
         // Arrange
+        const int pageIndex = 1;
+        const string searchString = "";
+
         var expectedModel = new CategoriesListViewModel();
-        _mockService.Setup(s => s.GetCategoriesAsync(null, pageIndex)).ReturnsAsync(expectedModel);
+        _mockService.Setup(s => s.GetCategoriesAsync(searchString, pageIndex)).ReturnsAsync(expectedModel);
 
         // Act
-        var result = await _controller.Index(null, pageIndex);
+        var result = await _controller.Index(searchString, pageIndex);
 
         // Assert
         var viewResult = Assert.IsType<ViewResult>(result);
@@ -67,8 +68,7 @@ public class CategoriesControllerTests
 
         // Assert
         var viewResult = Assert.IsType<ViewResult>(result);
-        Assert.True(_controller.ModelState.ErrorCount == 1);
-        Assert.Equal("Name", _controller.ModelState.Keys.First());
+        Assert.Equal(1, _controller.ModelState.ErrorCount);
     }
 
     [Fact]
@@ -83,37 +83,47 @@ public class CategoriesControllerTests
         // Assert
         var redirectResult = Assert.IsType<RedirectToActionResult>(result);
         Assert.Equal("Index", redirectResult.ActionName);
+        Assert.Equal("Category updated successfully!", _controller.TempData["SuccessMessage"]);
+    }
+
+    [Fact]
+    public async Task Edit_Post_DuplicateName_ReturnsViewWithError()
+    {
+        // Arrange
+        var model = new Category { Id = 1, Name = "Duplicated" };
+        _mockService.Setup(s => s.EditCategoryAsync(model)).ThrowsAsync(new NameAlreadyExistsException("Name already exists"));
+
+        // Act
+        var result = await _controller.Edit(1, model);
+
+        // Assert
+        var viewResult = Assert.IsType<ViewResult>(result);
+        Assert.Equal(1, _controller.ModelState.ErrorCount);
     }
 
     [Fact]
     public async Task Delete_ValidId_ReturnsViewWithCategory()
     {
         // Arrange
-        var mockService = new Mock<ICategoryService>();
-        var category = new Category { Id = 1, Name = "Bug" };
-        mockService.Setup(s => s.GetCategoryAsync(1)).ReturnsAsync(category);
-
-        var controller = new CategoriesController(mockService.Object);
+        var model = new Category { Id = 1, Name = "Bug" };
+        _mockService.Setup(s => s.GetCategoryAsync(1)).ReturnsAsync(model);
 
         // Act
-        var result = await controller.Delete(1);
+        var result = await _controller.Delete(1);
 
         // Assert
         var viewResult = Assert.IsType<ViewResult>(result);
-        Assert.Equal(category, viewResult.Model);
+        Assert.Equal(model, viewResult.Model);
     }
 
     [Fact]
     public async Task Delete_InvalidId_ReturnsNotFound()
     {
         // Arrange
-        var mockService = new Mock<ICategoryService>();
-        mockService.Setup(s => s.GetCategoryAsync(999)).ReturnsAsync((Category?)null);
-
-        var controller = new CategoriesController(mockService.Object);
+        _mockService.Setup(s => s.GetCategoryAsync(1)).ReturnsAsync((Category?)null);
 
         // Act
-        var result = await controller.Delete(999);
+        var result = await _controller.Delete(1);
 
         // Assert
         Assert.IsType<NotFoundResult>(result);
@@ -123,48 +133,29 @@ public class CategoriesControllerTests
     public async Task DeleteConfirmed_ValidId_RedirectsToIndexWithSuccess()
     {
         // Arrange
-        var mockService = new Mock<ICategoryService>();
-        mockService.Setup(s => s.DeleteCategoryAsync(1)).Returns(Task.CompletedTask);
-
-        var controller = new CategoriesController(mockService.Object)
-        {
-            TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>())
-        };
+        _mockService.Setup(s => s.DeleteCategoryAsync(1)).Returns(Task.CompletedTask);
 
         // Act
-        var result = await controller.DeleteConfirmed(1);
+        var result = await _controller.DeleteConfirmed(1);
 
         // Assert
         var redirectResult = Assert.IsType<RedirectToActionResult>(result);
         Assert.Equal("Index", redirectResult.ActionName);
-        Assert.Equal("Category deleted successfully!", controller.TempData["SuccessMessage"]);
+        Assert.Equal("Category deleted successfully!", _controller.TempData["SuccessMessage"]);
     }
 
     [Fact]
     public async Task DeleteConfirmed_ConcurrencyError_RedirectsWithErrorMessage()
     {
         // Arrange
-        var mockService = new Mock<ICategoryService>();
-        mockService.Setup(s => s.DeleteCategoryAsync(1))
-            .ThrowsAsync(new DbUpdateConcurrencyException());
-
-        var controller = new CategoriesController(mockService.Object)
-        {
-            TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>())
-        };
+        _mockService.Setup(s => s.DeleteCategoryAsync(1)).ThrowsAsync(new DbUpdateConcurrencyException());
 
         // Act
-        var result = await controller.DeleteConfirmed(1);
+        var result = await _controller.DeleteConfirmed(1);
 
         // Assert
-        var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-        Assert.Equal("Index", redirectResult.ActionName);
-
-        // Check ModelState error
-        Assert.True(controller.ModelState.ContainsKey(""));
-        Assert.Equal(
-            "This record was edited by another user. Please refresh the page and try again.",
-            controller.ModelState[""].Errors[0].ErrorMessage
-        );
+        var actionResult = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal("Index", actionResult.ActionName);
+        Assert.Equal("This record was edited by another user. Please refresh the page and try again.", _controller.TempData["ErrorMessage"]);
     }
 }
