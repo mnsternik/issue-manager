@@ -3,6 +3,7 @@ using IssueManager.Data;
 using IssueManager.Exceptions;
 using IssueManager.Mapping;
 using IssueManager.Models.ViewModels.Categories;
+using IssueManager.Models.ViewModels.Teams;
 using IssueManager.Services.Categories;
 using IssueManager.Test.TestData;
 using Microsoft.EntityFrameworkCore;
@@ -11,12 +12,12 @@ using Moq;
 
 namespace IssueManager.Test.Services;
 
-public class CategoryServiceTests : IDisposable
+public class CategoryServiceTests
 {
     private readonly ApplicationDbContext _context;
     private readonly IMapper _mapper;
     private readonly ILogger<CategoryService> _logger;
-
+    private readonly CategoryService _service;
 
     public CategoryServiceTests()
     {
@@ -33,6 +34,8 @@ public class CategoryServiceTests : IDisposable
 
         _logger = Mock.Of<ILogger<CategoryService>>();
 
+        _service = new CategoryService(_context, _mapper, _logger);
+
         SeedDatabase();
     }
 
@@ -45,21 +48,15 @@ public class CategoryServiceTests : IDisposable
         _context.SaveChanges();
     }
 
-    public void Dispose()
-    {
-        _context.Dispose();
-    }
-
     [Fact]
     public async Task GetCategoriesAsync_WithSearch_ReturnsFilteredResults()
     {
         // Arrange
-        var service = new CategoryService(_context, _mapper, _logger);
-        var category = CategoryTestData.GetSampleCategories().First();
+        var category = await _context.Categories.FirstAsync();
         int pageIndex = 1; 
 
         // Act
-        var result = await service.GetCategoriesAsync(category.Name, pageIndex);
+        var result = await _service.GetCategoriesAsync(category.Name, pageIndex);
 
         // Assert
         Assert.Single(result.Categories);
@@ -67,28 +64,48 @@ public class CategoryServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task CreateCategoryAsync_SuccessfullyAddsNewCategory()
+    {
+        // Arrange
+        int initialCategoryCount = await _context.Categories.CountAsync();
+        var newCategoryModel = new CreateCategoryViewModel { Name = "New category" };
+
+        // Act
+        await _service.CreateCategoryAsync(newCategoryModel);
+
+        // Assert
+        var categories = await _context.Categories.ToListAsync();
+        var newCategory = categories.FirstOrDefault(c => c.Name == newCategoryModel.Name);
+
+        Assert.NotNull(newCategory);
+        Assert.Equal(initialCategoryCount + 1, categories.Count);
+        Assert.Equal(newCategoryModel.Name, newCategory?.Name);
+    }
+
+    [Fact]
     public async Task CreateCategoryAsync_DuplicateName_ThrowsException()
     {
         // Arrange
-        var service = new CategoryService(_context, _mapper, _logger);
-        var category = CategoryTestData.GetSampleCategories().First();
+        var category = await _context.Categories.FirstAsync();
         var model = new CreateCategoryViewModel { Name = category.Name };
 
-        // Act & Assert
-        await Assert.ThrowsAsync<NameAlreadyExistsException>(() => service.CreateCategoryAsync(model));
+        // Act
+        var exception = await Assert.ThrowsAsync<NameAlreadyExistsException>(() => _service.CreateCategoryAsync(model));
+
+        // Assert
+        Assert.Equal("Category with this name already exists", exception.Message);
     }
 
     [Fact]
     public async Task EditCategoryAsync_NewName_UpdatesSuccessfully()
     {
         // Arrange
-        var service = new CategoryService(_context, _mapper, _logger);
         var category = await _context.Categories.FirstAsync(); 
         var newName = "Critical Bug";
 
         // Act
         category.Name = newName;
-        await service.EditCategoryAsync(category);
+        await _service.EditCategoryAsync(category);
         var updated = await _context.Categories.FindAsync(category.Id);
 
         // Assert
@@ -99,11 +116,10 @@ public class CategoryServiceTests : IDisposable
     public async Task DeleteCategoryAsync_ValidId_RemovesCategory()
     {
         // Arrange
-        var service = new CategoryService(_context, _mapper, _logger);
-        var category = CategoryTestData.GetSampleCategories().First();
+        var category = await _context.Categories.FirstAsync();
 
         // Act
-        await service.DeleteCategoryAsync(category.Id);
+        await _service.DeleteCategoryAsync(category.Id);
         var deleted = await _context.Categories.FindAsync(category.Id);
 
         // Assert
