@@ -1,20 +1,13 @@
-﻿using AutoMapper;
-using IssueManager.Controllers;
+﻿using IssueManager.Controllers;
 using IssueManager.Exceptions;
 using IssueManager.Models;
 using IssueManager.Models.ViewModels.Teams;
 using IssueManager.Services.Teams;
-using IssueManager.Test.TestData;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace IssueManager.Test.Controllers
 {
@@ -35,8 +28,8 @@ namespace IssueManager.Test.Controllers
         public async Task Index_ReturnsViewWithTeams()
         {
             // Arrange
-            const int pageIndex = 1;
-            const string searchString = "";
+            int pageIndex = 1;
+            string searchString = "";
 
             var expectedModel = new TeamsListViewModel();
             _mockService.Setup(s => s.GetTeamsAsync(searchString, pageIndex)).ReturnsAsync(expectedModel);

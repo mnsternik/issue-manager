@@ -27,8 +27,8 @@ public class CategoriesControllerTests
     public async Task Index_ReturnsViewWithCategories()
     {
         // Arrange
-        const int pageIndex = 1;
-        const string searchString = "";
+        int pageIndex = 1;
+        string searchString = "";
 
         var expectedModel = new CategoriesListViewModel();
         _mockService.Setup(s => s.GetCategoriesAsync(searchString, pageIndex)).ReturnsAsync(expectedModel);
