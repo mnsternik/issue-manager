@@ -14,13 +14,13 @@ namespace IssueManager.Test.Controllers
     public class TeamsControllerTests
     {
 
-        private readonly Mock<ITeamService> _mockService;
+        private readonly Mock<ITeamService> _mockTeamService;
         private readonly TeamsController _controller;
 
         public TeamsControllerTests()
         {
-            _mockService = new Mock<ITeamService>();
-            _controller = new TeamsController(_mockService.Object);
+            _mockTeamService = new Mock<ITeamService>();
+            _controller = new TeamsController(_mockTeamService.Object);
             _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
         }
 
@@ -32,7 +32,7 @@ namespace IssueManager.Test.Controllers
             string searchString = "";
 
             var expectedModel = new TeamsListViewModel();
-            _mockService.Setup(s => s.GetTeamsAsync(searchString, pageIndex)).ReturnsAsync(expectedModel);
+            _mockTeamService.Setup(s => s.GetTeamsAsync(searchString, pageIndex)).ReturnsAsync(expectedModel);
 
             // Act
             var result = await _controller.Index(searchString, pageIndex);
@@ -62,7 +62,7 @@ namespace IssueManager.Test.Controllers
         {
             // Arrange
             var model = new CreateTeamViewModel { Name = "Duplicate" };
-            _mockService.Setup(s => s.CreateTeamAsync(model)).ThrowsAsync(new NameAlreadyExistsException("Name already exists"));
+            _mockTeamService.Setup(s => s.CreateTeamAsync(model)).ThrowsAsync(new NameAlreadyExistsException("Name already exists"));
 
             // Act
             var result = await _controller.Create(model);
@@ -92,7 +92,7 @@ namespace IssueManager.Test.Controllers
         {
             // Arrange
             var model = new Team { Id = 1, Name = "Duplicated" };
-            _mockService.Setup(s => s.EditTeamAsync(model)).ThrowsAsync(new NameAlreadyExistsException("Name already exists"));
+            _mockTeamService.Setup(s => s.EditTeamAsync(model)).ThrowsAsync(new NameAlreadyExistsException("Name already exists"));
 
             // Act
             var result = await _controller.Edit(1, model);
@@ -107,7 +107,7 @@ namespace IssueManager.Test.Controllers
         {
             // Arrange
             var model =  new Team { Id = 1, Name = "Test" }; 
-            _mockService.Setup(s => s.GetTeamAsync(model.Id)).ReturnsAsync(model);
+            _mockTeamService.Setup(s => s.GetTeamAsync(model.Id)).ReturnsAsync(model);
 
             // Act
             var result = await _controller.Delete(model.Id);
@@ -121,7 +121,7 @@ namespace IssueManager.Test.Controllers
         public async Task Delete_InvalidId_ReturnsNotFound()
         {
             // Arrange
-            _mockService.Setup(s => s.GetTeamAsync(1)).ReturnsAsync((Team?)null);
+            _mockTeamService.Setup(s => s.GetTeamAsync(1)).ReturnsAsync((Team?)null);
 
             // Act
             var result = await _controller.Delete(1);
@@ -134,14 +134,14 @@ namespace IssueManager.Test.Controllers
         public async Task DeleteConfirmed_ValidId_RedirectsToIndexWithSuccess()
         {
             // Arrange
-            _mockService.Setup(s => s.DeleteTeamAsync(1)).Returns(Task.CompletedTask);
+            _mockTeamService.Setup(s => s.DeleteTeamAsync(1)).Returns(Task.CompletedTask);
 
             // Act
             var result = await _controller.DeleteConfirmed(1);
 
             // Assert
-            var actionResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal("Index", actionResult.ActionName);
+            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirectResult.ActionName);
             Assert.Equal("Team deleted successfully!", _controller.TempData["SuccessMessage"]);
         }
 
@@ -149,14 +149,14 @@ namespace IssueManager.Test.Controllers
         public async Task DeleteConfirmed_ConcurrencyError_RedirectsWithErrorMessage()
         {
             // Arrange
-            _mockService.Setup(s => s.DeleteTeamAsync(1)).ThrowsAsync(new DbUpdateConcurrencyException());
+            _mockTeamService.Setup(s => s.DeleteTeamAsync(1)).ThrowsAsync(new DbUpdateConcurrencyException());
 
             // Act
             var result = await _controller.DeleteConfirmed(1);
 
             // Assert
-            var actionResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal("Index", actionResult.ActionName);
+            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirectResult.ActionName);
             Assert.Equal("This record was edited by another user. Please refresh the page and try again.", _controller.TempData["ErrorMessage"]);
         }
     }

@@ -13,13 +13,13 @@ namespace IssueManager.Tests.Controllers;
 
 public class CategoriesControllerTests
 {
-    private readonly Mock<ICategoryService> _mockService;
+    private readonly Mock<ICategoryService> mockCategoryService;
     private readonly CategoriesController _controller;
 
     public CategoriesControllerTests()
     {
-        _mockService = new Mock<ICategoryService>();
-        _controller = new CategoriesController(_mockService.Object);
+        mockCategoryService = new Mock<ICategoryService>();
+        _controller = new CategoriesController(mockCategoryService.Object);
         _controller.TempData = new TempDataDictionary(new DefaultHttpContext(), Mock.Of<ITempDataProvider>());
     }
 
@@ -31,7 +31,7 @@ public class CategoriesControllerTests
         string searchString = "";
 
         var expectedModel = new CategoriesListViewModel();
-        _mockService.Setup(s => s.GetCategoriesAsync(searchString, pageIndex)).ReturnsAsync(expectedModel);
+        mockCategoryService.Setup(s => s.GetCategoriesAsync(searchString, pageIndex)).ReturnsAsync(expectedModel);
 
         // Act
         var result = await _controller.Index(searchString, pageIndex);
@@ -61,7 +61,7 @@ public class CategoriesControllerTests
     {
         // Arrange
         var model = new CreateCategoryViewModel { Name = "Duplicate" };
-        _mockService.Setup(s => s.CreateCategoryAsync(model)).ThrowsAsync(new NameAlreadyExistsException("Name already exists"));
+        mockCategoryService.Setup(s => s.CreateCategoryAsync(model)).ThrowsAsync(new NameAlreadyExistsException("Name already exists"));
 
         // Act
         var result = await _controller.Create(model);
@@ -91,7 +91,7 @@ public class CategoriesControllerTests
     {
         // Arrange
         var model = new Category { Id = 1, Name = "Duplicated" };
-        _mockService.Setup(s => s.EditCategoryAsync(model)).ThrowsAsync(new NameAlreadyExistsException("Name already exists"));
+        mockCategoryService.Setup(s => s.EditCategoryAsync(model)).ThrowsAsync(new NameAlreadyExistsException("Name already exists"));
 
         // Act
         var result = await _controller.Edit(1, model);
@@ -106,7 +106,7 @@ public class CategoriesControllerTests
     {
         // Arrange
         var model = new Category { Id = 1, Name = "Bug" };
-        _mockService.Setup(s => s.GetCategoryAsync(1)).ReturnsAsync(model);
+        mockCategoryService.Setup(s => s.GetCategoryAsync(1)).ReturnsAsync(model);
 
         // Act
         var result = await _controller.Delete(1);
@@ -120,7 +120,7 @@ public class CategoriesControllerTests
     public async Task Delete_InvalidId_ReturnsNotFound()
     {
         // Arrange
-        _mockService.Setup(s => s.GetCategoryAsync(1)).ReturnsAsync((Category?)null);
+        mockCategoryService.Setup(s => s.GetCategoryAsync(1)).ReturnsAsync((Category?)null);
 
         // Act
         var result = await _controller.Delete(1);
@@ -133,7 +133,7 @@ public class CategoriesControllerTests
     public async Task DeleteConfirmed_ValidId_RedirectsToIndexWithSuccess()
     {
         // Arrange
-        _mockService.Setup(s => s.DeleteCategoryAsync(1)).Returns(Task.CompletedTask);
+        mockCategoryService.Setup(s => s.DeleteCategoryAsync(1)).Returns(Task.CompletedTask);
 
         // Act
         var result = await _controller.DeleteConfirmed(1);
@@ -148,14 +148,14 @@ public class CategoriesControllerTests
     public async Task DeleteConfirmed_ConcurrencyError_RedirectsWithErrorMessage()
     {
         // Arrange
-        _mockService.Setup(s => s.DeleteCategoryAsync(1)).ThrowsAsync(new DbUpdateConcurrencyException());
+        mockCategoryService.Setup(s => s.DeleteCategoryAsync(1)).ThrowsAsync(new DbUpdateConcurrencyException());
 
         // Act
         var result = await _controller.DeleteConfirmed(1);
 
         // Assert
-        var actionResult = Assert.IsType<RedirectToActionResult>(result);
-        Assert.Equal("Index", actionResult.ActionName);
+        var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal("Index", redirectResult.ActionName);
         Assert.Equal("This record was edited by another user. Please refresh the page and try again.", _controller.TempData["ErrorMessage"]);
     }
 }
