@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using IssueManager.Data;
+using IssueManager.Exceptions;
 using IssueManager.Models;
 using IssueManager.Models.ViewModels.Requests;
 using IssueManager.Services.Files;
@@ -223,8 +224,20 @@ namespace IssueManager.Services.Requests
 
             try
             {
-                var request = _mapper.Map<Request>(requestViewModel);
+                var request = await _context.Requests.FindAsync(requestViewModel.Id);
+                
+                if (request == null)
+                {
+                    _logger.LogError("Request with ID: {RequestId} not found" , requestViewModel.Id);
+                    throw new EntityNotFoundException(nameof(Request), requestViewModel.Id);
+                }
+
                 request.UpdateDate = DateTime.UtcNow;
+                request.Priority = requestViewModel.Priority;
+                request.CategoryId = requestViewModel.CategoryId;
+                request.AssignedTeamId = requestViewModel.AssignedTeamId;
+                request.AssignedUserId = requestViewModel.AssignedUserId;
+                request.Status = requestViewModel.Status;
 
                 _context.Update(request);
                 await _context.SaveChangesAsync();
