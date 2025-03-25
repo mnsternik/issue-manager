@@ -4,7 +4,7 @@ namespace IssueManager.Test.TestData
 {
     public class UserTestData
     {
-        public static List<User> GetUsersSample() 
+        public static List<User> GetSampleUsers() 
         { 
             return new List<User>
             {
