@@ -3,7 +3,6 @@ using IssueManager.Data;
 using IssueManager.Exceptions;
 using IssueManager.Mapping;
 using IssueManager.Models.ViewModels.Categories;
-using IssueManager.Models.ViewModels.Teams;
 using IssueManager.Services.Categories;
 using IssueManager.Test.TestData;
 using Microsoft.EntityFrameworkCore;

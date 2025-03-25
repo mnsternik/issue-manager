@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using IssueManager.Data;
-using IssueManager.Exceptions;
 using IssueManager.Mapping;
 using IssueManager.Models;
 using IssueManager.Models.ViewModels.Requests;
@@ -11,10 +10,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System;
 using System.Security.Claims;
-using System.Threading.Tasks;
-using Xunit;
+
 
 namespace IssueManager.Test.Services;
 
@@ -98,23 +95,6 @@ public class RequestServiceTests
         Assert.Equal(initialCount + 1, await _context.Requests.CountAsync());
     }
 
-    //[Fact]
-    //public async Task CreateRequestAsync_InvalidCategory_ThrowsException()
-    //{
-    //    // Arrange
-    //    var model = new CreateRequestViewModel
-    //    {
-    //        Title = "Invalid Category",
-    //        Description = "Test",
-    //        Priority = RequestPriority.Low,
-    //        CategoryId = 999 // Non-existent
-    //    };
-
-    //    // Act & Assert
-    //    await Assert.ThrowsAsync<NotFoundException>(() =>
-    //        _service.CreateRequestAsync(model, GetTestUser()));
-    //}
-
     [Fact]
     public async Task AssignRequestAsync_ValidRequest_UpdatesAssignment()
     {
@@ -173,8 +153,11 @@ public class RequestServiceTests
     [Fact]
     public async Task GetRequestDetailsAsync_InvalidId_ReturnsNull()
     {
+        // Arrange 
+        int nonExistingId = 999;
+
         // Act
-        var result = await _service.GetRequestDetailsAsync(999, GetTestUser());
+        var result = await _service.GetRequestDetailsAsync(nonExistingId, GetTestUser());
 
         // Assert
         Assert.Null(result);
