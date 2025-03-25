@@ -21,6 +21,8 @@ namespace IssueManager
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            builder.Configuration.AddEnvironmentVariables();
+
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
                                    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
