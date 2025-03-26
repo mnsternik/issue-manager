@@ -1,0 +1,15 @@
+# Exclude build output directories
+bin/
+obj/
+
+# Exclude version control directories and related files
+.git/
+.gitignore
+
+# Exclude the solution file if not needed
+*.sln
+
+# Exclude other development files not needed for runtime
+README.md
+*.user
+*.suo
