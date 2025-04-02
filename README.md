@@ -62,7 +62,7 @@ cd issue-manager/IssueManager
 ```
 
 Modify the appsettings.Development.json file in the project to use your local SQL Server instance and add app admin user credentials:
-```bash
+```json
 "ConnectionStrings": {
   "DefaultConnection": "Server=localhost;Database={YourDbName};Trusted_Connection=True;MultipleActiveResultSets=true"
 },
