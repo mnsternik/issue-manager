@@ -66,7 +66,7 @@ Modify the appsettings.Development.json file in the project to use your local SQ
 "ConnectionStrings": {
   "DefaultConnection": "Server=localhost;Database={YourDbName};Trusted_Connection=True;MultipleActiveResultSets=true"
 },
-"AdminUser" {
+"AdminUser": {
   "Email": "{YourEmail}",
   "Password": "{YourPassword123!}"
 }
