@@ -43,6 +43,9 @@ IssueManager/
 ├── Utilities/ # Helpers and extensions  
 ├── wwwroot/ # Static files  
 └── Dockerfile # Docker container configuration
+IssueManager.Test/
+├── Controllers/ # Controllers' unit tests 
+├── Services/ # Services' unit tests
 ```
 
 ## Getting Started 🚀
