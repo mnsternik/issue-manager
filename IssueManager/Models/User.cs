@@ -8,10 +8,8 @@ namespace IssueManager.Models
         [Required]
         public string Name { get; set; } = string.Empty;
 
-        [Required]
         public int TeamId { get; set; }
 
-        [Required]
         public Team Team { get; set; }
     }
 }
