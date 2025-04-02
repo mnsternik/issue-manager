@@ -14,11 +14,12 @@ RUN dotnet publish -c Release -o /app/publish
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 
+# HTTPS
+ENV ASPNETCORE_ENVIRONMENT=Production
+ENV ASPNETCORE_URLS=http://+:80
+
 # Copy published files from the build stage
 COPY --from=build /app/publish .
-
-# Expose the port your app is listening on
-EXPOSE 8080
 
 # Start the application
 ENTRYPOINT ["dotnet", "IssueManager.dll"]
