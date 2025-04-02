@@ -19,4 +19,9 @@
     <PackageReference Include="System.Text.Json" Version="9.0.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+    <Folder Include="wwwroot\favicon\" />
+  </ItemGroup>
+
 </Project>
