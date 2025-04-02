@@ -12,6 +12,7 @@ using IssueManager.Services.DataLists;
 using IssueManager.Services.Users;
 using IssueManager.Services.Teams;
 using IssueManager.Services.Categories;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace IssueManager
 {
@@ -65,6 +66,11 @@ namespace IssueManager
             CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
             var app = builder.Build();
+
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
 
             using (var scope = app.Services.CreateScope())
             {
