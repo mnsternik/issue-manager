@@ -52,7 +52,6 @@ IssueManager.Test/
 
 ### Prerequisites
 - .NET 8 SDK
-- Docker Desktop
 - SQL Server 2019+
 
 ### Local Installation
