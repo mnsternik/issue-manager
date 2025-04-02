@@ -30,18 +30,20 @@ A professional issue tracking system with role-based access control, designed fo
 | **Frontend**           | Razor Pages, Bootstrap 5, JavaScript ES6                                   |
 | **Authentication**     | ASP.NET Identity, Role-based Authorization                                 |
 | **Database**           | SQL Server, Azure SQL Database                                             |
-| **DevOps**             | Docker, Azure App Service                                                  |
+| **DevOps**             | Docker, Azure App Service, Azure Container Registry                        |
 | **Testing**            | xUnit, Moq                                                                 |
 
 ## Project Structure 📂
-IssueManager/
-├── Controllers/ # MVC Controllers
-├── Services/ # Business logic layer
-├── Models/ # Domain models and ViewModels
-├── Data/ # EF Core DbContext and migrations
-├── Utilities/ # Helpers and extensions
-├── wwwroot/ # Static files
+```
+IssueManager/  
+├── Controllers/ # MVC Controllers  
+├── Services/ # Business logic layer  
+├── Models/ # Domain models and ViewModels  
+├── Data/ # EF Core DbContext and migrations  
+├── Utilities/ # Helpers and extensions  
+├── wwwroot/ # Static files  
 └── Dockerfile # Docker container configuration
+```
 
 ## Getting Started 🚀
 
@@ -54,12 +56,23 @@ IssueManager/
 ```bash
 # Clone repository
 git clone https://github.com/mnsternik/issue-manager.git
+cd issue-manager/IssueManager
+```
 
-# Build and run with Docker
-docker-compose up --build
+Modify the appsettings.Development.json file in the project to use your local SQL Server instance and add app admin user credentials:
+```bash
+"ConnectionStrings": {
+  "DefaultConnection": "Server=localhost;Database={YourDbName};Trusted_Connection=True;MultipleActiveResultSets=true"
+},
+"AdminUser" {
+  "Email": "{YourEmail}",
+  "Password": "{YourPassword123!}"
+}
+```
 
-# Apply database migrations
-docker exec -it issuemanager-web-1 dotnet ef database update
+```
+# Run the application
+dotnet run
 ```
 
 # License 📄
