@@ -72,7 +72,7 @@ Modify the appsettings.Development.json file in the project to use your local SQ
 }
 ```
 
-```
+```bash
 # Run the application
 dotnet run
 ```
