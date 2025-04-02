@@ -15,6 +15,12 @@ namespace IssueManager.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.Team)
+                .WithMany(t => t.Users)
+                .HasForeignKey(u => u.TeamId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<Request>()
                 .HasOne(r => r.AssignedUser)
                 .WithMany()
