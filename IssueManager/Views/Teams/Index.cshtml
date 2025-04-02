@@ -1,7 +1,7 @@
 ﻿@model IssueManager.Models.ViewModels.Teams.TeamsListViewModel
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Teams";
 }
 
 <div class="container">
@@ -50,15 +50,22 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model.Teams)
+                    @if (Model.Teams.Count > 0)
                     {
-                        <tr>
-                            <td>@Html.DisplayFor(modelItem => item.Name)</td>
-                            <td style="text-align: right">
-                                <a asp-action="Edit" asp-route-id="@item.Id" class="app-link">Details</a> |
-                                <a asp-action="Delete" asp-route-id="@item.Id" class="app-link app-link-delete">Delete</a>
-                            </td>
-                        </tr>
+                        @foreach (var item in Model.Teams)
+                        {
+                            <tr>
+                                <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                                <td style="text-align: right">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="app-link">Details</a> |
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="app-link app-link-delete">Delete</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else 
+                    {
+                        <tr><td colspan="12">No teams found</td></tr>
                     }
                 </tbody>
             </table>

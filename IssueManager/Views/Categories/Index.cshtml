@@ -1,14 +1,14 @@
 ﻿@model IssueManager.Models.ViewModels.Categories.CategoriesListViewModel; 
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Categories";
 }
 
 <div class="container">
     <div class="app-container">
         <div class="app-header">
             <h2 class="mb-0">Categories Management</h2>
-            <p class="mb-0 opacity-75">View and manage all reuqest's categories</p>
+            <p class="mb-0 opacity-75">View and manage all reuqests' categories</p>
         </div>
 
         <div class="d-flex flex-column flex-md-row-reverse gap-3 gap-md-0 justify-content-between mb-3" style="align-items:baseline">
@@ -50,15 +50,21 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model.Categories)
+                    @if (Model.Categories.Count > 0) {
+                        foreach (var item in Model.Categories)
+                        {
+                            <tr>
+                                <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                                <td style="text-align: right">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="app-link"> Details</a> |
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="app-link app-link-delete">Delete</a>
+                                </td>
+                            </tr>
+                        }
+                    } 
+                    else 
                     {
-                        <tr>
-                            <td>@Html.DisplayFor(modelItem => item.Name)</td>
-                            <td style="text-align: right">
-                                <a asp-action="Edit" asp-route-id="@item.Id" class="app-link"> Details</a> | 
-                                <a asp-action="Delete" asp-route-id="@item.Id" class="app-link app-link-delete">Delete</a>
-                            </td>
-                        </tr>
+                        <tr><td colspan="12">No categories found</td></tr>
                     }
                 </tbody>
             </table>
