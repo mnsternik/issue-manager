@@ -69,6 +69,7 @@ namespace IssueManager.Utilities
                 var user = new User
                 {
                     Name = "Admin",
+                    UserName = email,
                     Email = email,
                     EmailConfirmed = true,
                     TeamId = team.Id
