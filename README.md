@@ -1,4 +1,4 @@
-# IssueManager 🚀
+# IssueManager 
 
 A professional issue tracking system with role-based access control, designed for efficient team collaboration and request management. Deployed as a Docker container on Azure App Service.
 
